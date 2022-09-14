@@ -1,10 +1,11 @@
 """
-start from one origin to all destinations
+Start from one origin to all destinations
 
 """
 
 import streamlit as st
 import sys
+import time
 import numpy as np
 sys.path.append("..")
 import gtfs_graph
@@ -23,10 +24,9 @@ from copy import deepcopy
 
 import folium
 import branca.colormap as cm
-from streamlit_folium import st_folium
+from streamlit_folium import st_folium, folium_static
 
 
-st.write("Step 4. Travel time index between same OD")
 if "b4_1_clicked" not in st.session_state.keys():
     st.session_state["b4_1_clicked"] = False
 if "stop_id" not in st.session_state.keys():
@@ -76,34 +76,38 @@ def page_3():
     with col1:
         st.write("Step 4. Query shortest travel scheme from one origin at different time of the day")
         stop_id = st.text_input("choose stop id")
-        max_tt = st.slider("Select maximum travel time (cutoff of the Dijkstra's algorithm)", 0, 180, 60, 15)
-        depart_hr = st.slider("Departure time (hour of a day)", 0, 23, 8, 1)
+        max_tt = st.slider("Select maximum travel time (cutoff of the Dijkstra's algorithm)",
+                           0, 180, 120, 15)
+        depart_hr = st.slider("Departure time (hour of a day)",
+                              0, 23, 8, 1)
         # start building network and query shortest paths
         if (st.button("Start analysis & plot results") or
                 st.session_state.b4_1_clicked and
                 stop_id != ""):  # if stop_id != "", no inputs, just enter the page
             st.session_state["b4_1_clicked"] = True
             st.session_state["stop_id"] = stop_id
-            # find shortest paths from stop_id
-            one_source_paths = GRAPH_OBJ.query_origin_stop_time(
-                stop_id=stop_id,
-                depart_min=60 * depart_hr,  # departure at 8 AM
-                cutoff=max_tt)
-            # get a dict of shortest path information
-            one_source_access_dict = GRAPH_OBJ.get_shortest_tts(one_source_paths)
-            one_source_path_dict = GRAPH_OBJ.get_shortest_paths(one_source_paths)
-            # then, plot graph searched results
-            m = ut.display_one_origin_map(stops,
-                                          GRAPH_OBJ,
-                                          one_source_access_dict,
-                                          one_source_path_dict)
+            with st.spinner('Analyzing shortest travel time to other stops...'):
+                # find shortest paths from stop_id
+                one_source_paths = GRAPH_OBJ.query_origin_stop_time(
+                    stop_id=stop_id,
+                    depart_min=60 * depart_hr,  # departure at 8 AM
+                    cutoff=max_tt)
+                # get a dict of shortest path information
+                one_source_access_dict = GRAPH_OBJ.get_shortest_tts(one_source_paths)
+                one_source_path_dict = GRAPH_OBJ.get_shortest_paths(one_source_paths)
+                # then, plot graph searched results
+                m = ut.display_one_origin_map(stops,
+                                              GRAPH_OBJ,
+                                              one_source_access_dict,
+                                              one_source_path_dict)
     with col2:
         # plot map for reference...
-        st.write("visual reference of stops")
-        ut.show_stops_map(GTFS_OBJ)
+        st.write("map reference of stops")
+        with st.spinner('Loading map...'):
+            ut.show_stops_map(GTFS_OBJ)
     return m
 
 
 m = page_3()
 if m is not None:
-    st_data = st_folium(m, width=700, height=500)
+    st_data = folium_static(m, width=700, height=500)

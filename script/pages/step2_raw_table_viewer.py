@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 import os
+import time
 import streamlit as st
 import pandas as pd
 
@@ -18,7 +19,6 @@ print("step2 GTFS_OBJ", GTFS_OBJ)
 
 def page_2_2():
     st.write("Step 2. Table interative analyzer")
-
     # ["agency.txt", "stops.txt", "calendar.txt", "calendar_dates.txt",
     #  "routes.txt", "shapes.txt", "stop_times.txt", "trips.txt"]
     all_tabs = st.tabs(GTFS_OBJ.file_names)  # one tab for each table

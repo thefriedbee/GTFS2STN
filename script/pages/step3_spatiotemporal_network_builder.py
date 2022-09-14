@@ -3,6 +3,7 @@ Build spatiotemporal network based on needs
 """
 import sys
 import json
+import time
 import numpy as np
 
 sys.path.append("..")
@@ -39,10 +40,11 @@ def page_3():
         sids = GTFS_OBJ.dfs["calendar.txt"]["service_id"].tolist()
         service_ids = st.multiselect("choose service id", sids, sids[0])
         # (2) choose walk speed
-        walk_speed = st.slider("Select walking speed (mph)", 1, 3, 1, 1)
+        walk_speed = st.slider("Select walking speed (mph)",
+                               1, 3, 2, 1)
         # (3) choose walk buffer (maximal walking distance)
         bw_mile = st.slider("Select maximum walking distance between stops (mile)",
-                            0.0, 1.5, 0.25, 0.05)
+                            0.0, 1.5, 0.5, 0.05)
         # (4) choose network's time resolution (15 minutes)
         time_res = st.select_slider("choose time resolution for entering/existing the transit system (minutes)",
                                     options=[5, 15, 30, 60], value=15)
@@ -58,17 +60,21 @@ def page_3():
             st.session_state["b3_1_clicked"] = True
             # start building the spatio-temporal network!
             print("network_config_info:", network_config_info)
-            GRAPH_OBJ = build_network(network_config_info)
+            with st.spinner('Building transit network...'):
+                GRAPH_OBJ = build_network(network_config_info)
+            st.success('Network built successfully!')
             print("GRAPH OBJ after built:", GRAPH_OBJ)
             st.download_button("Download network in JSON format!",
                                data=json.dumps(nx.to_dict_of_lists(GRAPH_OBJ.G)),
                                file_name='My_GTFS_Graph.json')
     with col2:  # show service id table to select
         st.write("'Calendar.txt' for reference")
-        ut.show_interact_table(GTFS_OBJ, 'calendar.txt')
+        with st.spinner('Loading table calendar.txt...'):
+            ut.show_static_table(GTFS_OBJ, 'calendar.txt')
 
 
 # given configurations, build network
+@st.cache(suppress_st_warning=True, show_spinner=False, allow_output_mutation=True)
 def build_network(network_config_info):
     if len(network_config_info) == 0:
         return None
@@ -88,8 +94,10 @@ def build_network(network_config_info):
     # get stops information
     stop_ids = list(set(stop_times["stop_id"].to_list()))
     stops = ut.filter_stops_by_stop_ids(GTFS_OBJ, stop_ids)
+    # stops = stops.copy()
     # stops = GTFS_OBJ.dfs["stops.txt"]
     stops = ut.find_stops_neighbors_within_buffer(stops, bw_mile=bw_mile)
+    # stops = stops.copy()
     # stop_times = GTFS_OBJ.dfs["stop_times.txt"]
     # build spatio-temporal networks
     gtfs_graph.add_nodes_all_stops(stops, GRAPH_OBJ, t_step=time_res)

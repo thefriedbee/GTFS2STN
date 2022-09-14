@@ -18,9 +18,11 @@ from scipy.spatial import cKDTree
 from sklearn.neighbors import BallTree
 import folium
 import branca.colormap as cm
+from streamlit_folium import st_folium, folium_static
 
 
 # check all files previously stored for analysis
+@st.cache
 def init_agencies():
     global AGENCIES
     AGENCIES = os.walk(os.path.join("GTFS_inputs"))
@@ -30,18 +32,33 @@ def init_agencies():
     return AGENCIES
 
 
+@st.cache(suppress_st_warning=True, show_spinner=False, allow_output_mutation=True)
+def create_stops_table(GTFS_OBJ, w=600, h=600):
+    df, gridOptions = GTFS_OBJ.display_table(fn="stops.txt", width=w, height=h)
+    return df, gridOptions
+
+
 # display table and map information for the stops for analysis
 def show_stops_table(GTFS_OBJ, w=600, h=600):
-    # task: show top 5 rows of the station.txt file using Pandas
-    GTFS_OBJ.display_table(fn="stops.txt", width=w, height=h)
-    return GTFS_OBJ
+    df, gridOptions = create_stops_table(GTFS_OBJ, w=w, h=h)
+    AgGrid(df, gridOptions=gridOptions)
+
+
+@st.cache(show_spinner=False, allow_output_mutation=True)
+def create_stops_map(GTFS_OBJ, w=600, h=600):
+    m = GTFS_OBJ.display_stops_map(width=w, height=h)
+    return m
 
 
 def show_stops_map(GTFS_OBJ, w=600, h=600):
-    GTFS_OBJ.display_stops_map(width=w, height=h)
+    m = create_stops_map(GTFS_OBJ, w=w, h=h)
+    if m is not None:
+        # call to render Folium map in Streamlit
+        st_data = folium_static(m, width=w, height=h)
 
 
-def show_static_table(GTFS_OBJ, df_name, w=600, h=600):
+@st.cache(suppress_st_warning=True, show_spinner=False, allow_output_mutation=True)
+def create_static_table(GTFS_OBJ, df_name, w=600, h=600):
     df = GTFS_OBJ.dfs[df_name]
     # display configuration
     gb = GridOptionsBuilder.from_dataframe(df)
@@ -50,10 +67,16 @@ def show_static_table(GTFS_OBJ, df_name, w=600, h=600):
     gb.configure_selection(selection_mode="disabled",
                            use_checkbox=False)
     gridOptions = gb.build()
+    return df, gridOptions
+
+
+def show_static_table(GTFS_OBJ, df_name, w=600, h=600):
+    df, gridOptions = create_static_table(GTFS_OBJ, df_name, w=w, h=h)
     selected_data = AgGrid(df, gridOptions=gridOptions)
 
 
-def show_interact_table(GTFS_OBJ, df_name):
+@st.cache(suppress_st_warning=True, show_spinner=False, allow_output_mutation=True)
+def create_interact_table(GTFS_OBJ, df_name):
     df = GTFS_OBJ.dfs[df_name]
     # display configuration
     gb = GridOptionsBuilder.from_dataframe(df)
@@ -63,6 +86,11 @@ def show_interact_table(GTFS_OBJ, df_name):
                            # pre_selected_rows=list(range(len(df)))
                            )
     gridOptions = gb.build()
+    return df, gridOptions
+
+
+def show_interact_table(GTFS_OBJ, df_name):
+    df, gridOptions = create_interact_table(GTFS_OBJ, df_name)
     selected_data = AgGrid(df, gridOptions=gridOptions)
                            # allow_unsafe_jscode=True,
                            # update_mode=GridUpdateMode.NO_UPDATE)
@@ -70,6 +98,7 @@ def show_interact_table(GTFS_OBJ, df_name):
 
 # when building network, each stop needs to know its neighboring stops
 # within walking distance, compute nearest points for each stop
+@st.cache(suppress_st_warning=True, show_spinner=False, allow_output_mutation=True)
 def find_stops_neighbors_within_buffer(stops, bw_mile=0.25):
     # convert to geopandas
     stops = gpd.GeoDataFrame(
@@ -99,6 +128,7 @@ def find_stops_neighbors_within_buffer(stops, bw_mile=0.25):
     return stops
 
 
+@st.cache(suppress_st_warning=True, show_spinner=False, allow_output_mutation=True)
 def display_one_origin_map(stops, GRAPH_OBJ, one_source_access_dict, one_source_path_dict):
     stops_acc = pd.DataFrame.from_dict(one_source_access_dict, orient='index')
     stops_acc = stops_acc.reset_index()
@@ -112,7 +142,7 @@ def display_one_origin_map(stops, GRAPH_OBJ, one_source_access_dict, one_source_
     print("stops_acc:")
     print(stops_acc.head(2))
     stops = stops[["stop_id", "stop_lat", "stop_lon", "stop_name", "stop_code"]]
-    
+
     stops['stop_id'] = stops['stop_id'].astype("string")
     stops_acc['stop_id'] = stops_acc['stop_id'].astype("string")
 
@@ -168,6 +198,7 @@ def display_one_origin_map(stops, GRAPH_OBJ, one_source_access_dict, one_source_
 
 
 # get subset trips given service ids
+@st.cache(suppress_st_warning=True, show_spinner=False, allow_output_mutation=True)
 def filter_trips_by_service_ids(GTFS_OBJ, service_ids):
     # service_ids: a list of service ids
     trips = GTFS_OBJ.dfs["trips.txt"]
@@ -176,6 +207,7 @@ def filter_trips_by_service_ids(GTFS_OBJ, service_ids):
     return trips_subset
 
 
+@st.cache(suppress_st_warning=True, show_spinner=False, allow_output_mutation=True)
 def filter_stop_times_by_trip_ids(GTFS_OBJ, trip_ids):
     # trip_ids: a list of trip ids
     stop_times = GTFS_OBJ.dfs["stop_times.txt"]
@@ -184,12 +216,14 @@ def filter_stop_times_by_trip_ids(GTFS_OBJ, trip_ids):
     return stop_times_subset
 
 
+@st.cache(suppress_st_warning=True, show_spinner=False, allow_output_mutation=True)
 def filter_stops_by_stop_ids(GTFS_OBJ, stop_ids):
     stops = GTFS_OBJ.dfs["stops.txt"]
     filt = stops["stop_id"].isin(stop_ids)
     return stops[filt]
 
 
+@st.cache(suppress_st_warning=True, show_spinner=False, allow_output_mutation=True)
 def get_path_costs(GRAPH_OBJ, nodes_lst):
     # print("node_lst:", nodes_lst)
     if len(nodes_lst) == 0:

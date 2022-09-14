@@ -12,7 +12,7 @@ import streamlit as st
 from st_aggrid import AgGrid
 from st_aggrid.grid_options_builder import GridOptionsBuilder
 from st_aggrid.shared import GridUpdateMode
-from streamlit_folium import st_folium
+from streamlit_folium import st_folium, folium_static
 import folium
 
 
@@ -64,12 +64,12 @@ class GTFSController:
             gb.configure_selection(selection_mode="disabled",
                                    use_checkbox=True)
             gridOptions = gb.build()
+            return self.dfs[fn], gridOptions
             # add grid
-            AgGrid(self.dfs[fn], gridOptions=gridOptions)
-                                   # allow_unsafe_jscode=True,
-                                   # update_mode=GridUpdateMode.NO_UPDATE)
+            # AgGrid(self.dfs[fn], gridOptions=gridOptions)
         else:
             st.write("possible file names:", self.dfs.keys())
+            return None
 
     def display_map_tile(self):
         # the most basic map to start with
@@ -94,8 +94,8 @@ class GTFSController:
                 radius=2,
                 weight=5,
             ).add_to(m)
-        # call to render Folium map in Streamlit
-        st_data = st_folium(m, width=width, height=height)
+        return m
+
 
     def display_routes_map(self, m=None, width=400, height=400):
         if m is None:
@@ -116,7 +116,7 @@ class GTFSController:
                             popup=lines_id[i],
                             tooltip=lines_id[i]).add_to(m)
         print("shapes printed!")
-        st_data = st_folium(m, width=width, height=height)
+        st_data = folium_static(m, width=width, height=height)
 
 
 

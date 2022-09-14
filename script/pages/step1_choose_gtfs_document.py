@@ -1,5 +1,6 @@
 import sys
 import os
+import time
 
 import streamlit as st
 import zipfile
@@ -29,11 +30,12 @@ def call_back_b2():
 
 
 # step (2). load data
-@st.cache
+@st.cache(suppress_st_warning=True, show_spinner=False)
 def load_gtfs(pth_unzipeed_folder):
     return GTFSController(root_dir=pth_unzipeed_folder)
 
 
+# @st.cache(suppress_st_warning=True)
 def page_1():
     gtfs_obj = None
     col1, col2 = st.columns(2)
@@ -44,7 +46,9 @@ def page_1():
             options=AGENCIES)
         if st.button('Confirm & Start Analysis!', on_click=call_back_b1) or st.session_state.b1_clicked:
             FOLDER_PTH = f"GTFS_inputs/{file_option}"
-            gtfs_obj = load_gtfs(FOLDER_PTH)  # GTFS_OBJ
+            with st.spinner('Processing GTFS documents...'):
+                gtfs_obj = load_gtfs(FOLDER_PTH)  # GTFS_OBJ
+            st.success('GTFS successfully loaded!')
     with col2:
         # step (1). Option 2. Upload or select your GTFS document for analysis
         uploaded_file = st.file_uploader("Or: upload your GTFS document", type="zip")
@@ -68,13 +72,18 @@ def page_1():
         # analyze uploaded file
         if st.button('Analyze uploaded zipped file!', on_click=call_back_b2) or st.session_state.b2_clicked:
             FOLDER_PTH = pth_unzipeed_folder
-            gtfs_obj = load_gtfs(FOLDER_PTH)  # GTFS_OBJ
+            with st.spinner('Processing GTFS documents...'):
+                gtfs_obj = load_gtfs(FOLDER_PTH)  # GTFS_OBJ
+            st.success('GTFS successfully loaded!')
     return gtfs_obj
 
 
 # results are recorded here in the global variable
 if "GTFS_OBJ" not in st.session_state.keys():
     st.session_state["GTFS_OBJ"] = None
+if "GRAPH_OBJ" not in st.session_state.keys():
+    st.session_state["GRAPH_OBJ"] = None
+
 st.session_state["GTFS_OBJ"] = page_1()
 print("step 1. GTFS_OBJ", st.session_state["GTFS_OBJ"])
 # Note: store results
