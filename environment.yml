@@ -3,7 +3,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-
+  - pip=22.2.2
   - pip:
     - attrs=22.1.0
     - blosc=1.21.1
@@ -103,7 +103,6 @@ dependencies:
     - pandas=1.4.4
     - pcre=8.45
     - pillow=9.2.0
-    - pip=22.2.2
     - pixman=0.40.0
     - poppler=22.04.0
     - poppler-data=0.4.11
