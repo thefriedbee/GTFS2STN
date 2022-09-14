@@ -2,10 +2,10 @@ numpy
 pandas
 geopandas
 streamlit
-streamlit_folium
+streamlit-folium
 folium
 branca
-st_aggrid
+streamlit-aggrid
 scipy
 sklearn
 networkx
