@@ -1,0 +1,12 @@
+numpy
+pandas
+geopandas
+streamlit
+streamlit_folium
+folium
+branca
+st_aggrid
+scipy
+sklearn
+networkx
+matplotlib
