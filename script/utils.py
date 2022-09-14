@@ -112,8 +112,9 @@ def display_one_origin_map(stops, GRAPH_OBJ, one_source_access_dict, one_source_
     print("stops_acc:")
     print(stops_acc.head(2))
     stops = stops[["stop_id", "stop_lat", "stop_lon", "stop_name", "stop_code"]]
-    stops['stop_id'] = stops['stop_id'].astype(int)
-    stops_acc['stop_id'] = stops_acc['stop_id'].astype(int)
+    
+    stops['stop_id'] = stops['stop_id'].astype("string")
+    stops_acc['stop_id'] = stops_acc['stop_id'].astype("string")
 
     stops = stops.merge(stops_acc, on="stop_id", how="left")
     print("stops:")
