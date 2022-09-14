@@ -23,8 +23,8 @@ import branca.colormap as cm
 # check all files previously stored for analysis
 def init_agencies():
     global AGENCIES
-    AGENCIES = os.walk(os.path.join("..", "GTFS_inputs"))
-    AGENCIES = glob(os.path.join("..", "GTFS_inputs", "*"),
+    AGENCIES = os.walk(os.path.join("GTFS_inputs"))
+    AGENCIES = glob(os.path.join("GTFS_inputs", "*"),
                     recursive=False)
     AGENCIES = [f.split('/')[-1] for f in AGENCIES]
     return AGENCIES

@@ -43,7 +43,7 @@ def page_1():
             "Select existed file for analysis 'State_City_Agency'",
             options=AGENCIES)
         if st.button('Confirm & Start Analysis!', on_click=call_back_b1) or st.session_state.b1_clicked:
-            FOLDER_PTH = f"../GTFS_inputs/{file_option}"
+            FOLDER_PTH = f"GTFS_inputs/{file_option}"
             gtfs_obj = load_gtfs(FOLDER_PTH)  # GTFS_OBJ
     with col2:
         # step (1). Option 2. Upload or select your GTFS document for analysis
@@ -55,13 +55,13 @@ def page_1():
             # save data
             # with zipfile.ZipFile("../GTFS_inputs/temp.zip", mode="w") as archive:
             #      archive.write(uploaded_file)
-            pth = f"../GTFS_inputs/"
-            pth_file = f"../GTFS_inputs/{uploaded_file.name}"
+            pth = f"GTFS_inputs/"
+            pth_file = f"GTFS_inputs/{uploaded_file.name}"
             fn = uploaded_file.name.split('.')[0]
             with open(pth_file, "wb+") as f:
                 f.write(uploaded_file.getbuffer())
             # next, unzip file to folder with same name
-            pth_unzipeed_folder = f"../GTFS_inputs/{fn}"
+            pth_unzipeed_folder = f"GTFS_inputs/{fn}"
             Path(pth_unzipeed_folder).mkdir(parents=True, exist_ok=True)
             with zipfile.ZipFile(pth_file, 'r') as zip_ref:
                 zip_ref.extractall(pth_unzipeed_folder)
@@ -73,6 +73,8 @@ def page_1():
 
 
 # results are recorded here in the global variable
+if "GTFS_OBJ" not in st.session_state.keys():
+    st.session_state["GTFS_OBJ"] = None
 st.session_state["GTFS_OBJ"] = page_1()
 print("step 1. GTFS_OBJ", st.session_state["GTFS_OBJ"])
 # Note: store results
