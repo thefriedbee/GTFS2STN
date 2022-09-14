@@ -10,3 +10,4 @@ scipy
 sklearn
 networkx
 matplotlib
+sortedcontainers
