@@ -8,7 +8,7 @@ import sys
 import time
 import numpy as np
 sys.path.append("..")
-import script.gtfs_graph
+import script.gtfs_graph as gtfs_graph
 from script.gtfs_graph import GTFS_Graph
 from script.gtfs_controller import GTFSController
 import script.utils as ut
