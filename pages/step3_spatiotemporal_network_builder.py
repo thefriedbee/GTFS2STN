@@ -77,7 +77,7 @@ def page_3_execute():
         st.session_state["b3_1_clicked"] = True
         print("network_config_info:", network_config_info)
         with st.spinner('Building transit network...'):
-            GRAPH_OBJ, stops = build_network(network_config_info)
+            GRAPH_OBJ, stops = build_network(network_config_info, GTFS_OBJ)
             st.session_state["GRAPH_OBJ"] = GRAPH_OBJ
             st.download_button("Download network in JSON format!",
                                data=json.dumps(nx.to_dict_of_lists(GRAPH_OBJ.G)),
@@ -89,7 +89,8 @@ def page_3_execute():
 
 
 # given configurations, build network
-def build_network(network_config_info):
+# @st.cache(show_spinner=False, allow_output_mutation=True)
+def build_network(network_config_info, GTFS_OBJ):
     if len(network_config_info) == 0:
         return None
     print("step3 GRAPH_OBJ in build_network:", GRAPH_OBJ)
@@ -117,6 +118,11 @@ def build_network(network_config_info):
     GRAPH_OBJ.add_edges_within_same_stops()
     # add destination nodes
     GRAPH_OBJ.add_hyper_nodes()
+    # print networkx size
+    # edge_mem = sum([sys.getsizeof(e) for e in GRAPH_OBJ.G.edges])
+    # node_mem = sum([sys.getsizeof(n) for n in GRAPH_OBJ.G.nodes])
+    # print("edge Graph_OBJ memory size consumed:", edge_mem)
+    # print("node Graph_OBJ memory size consumed:", node_mem)
     return GRAPH_OBJ, stops
 
 

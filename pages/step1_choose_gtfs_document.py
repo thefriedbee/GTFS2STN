@@ -44,11 +44,6 @@ def page_1():
         file_option = st.selectbox(
             "Select existed file for analysis 'State_City_Agency'",
             options=AGENCIES)
-        if st.button('Confirm & Start Analysis!', on_click=call_back_b1) or st.session_state.b1_clicked:
-            FOLDER_PTH = f"GTFS_inputs/{file_option}"
-            with st.spinner('Processing GTFS documents...'):
-                gtfs_obj = load_gtfs(FOLDER_PTH)  # GTFS_OBJ
-            st.success('GTFS successfully loaded!')
     with col2:
         # step (1). Option 2. Upload or select your GTFS document for analysis
         uploaded_file = st.file_uploader("Or: upload your GTFS document", type="zip")
@@ -69,7 +64,13 @@ def page_1():
             Path(pth_unzipeed_folder).mkdir(parents=True, exist_ok=True)
             with zipfile.ZipFile(pth_file, 'r') as zip_ref:
                 zip_ref.extractall(pth_unzipeed_folder)
-        # analyze uploaded file
+    with col1:
+        if st.button('Confirm & Start Analysis!', on_click=call_back_b1) or st.session_state.b1_clicked:
+            FOLDER_PTH = f"GTFS_inputs/{file_option}"
+            with st.spinner('Processing GTFS documents...'):
+                gtfs_obj = load_gtfs(FOLDER_PTH)  # GTFS_OBJ
+            st.success('GTFS successfully loaded!')
+    with col2:  # analyze uploaded file
         if st.button('Analyze uploaded zipped file!', on_click=call_back_b2) or st.session_state.b2_clicked:
             FOLDER_PTH = pth_unzipeed_folder
             with st.spinner('Processing GTFS documents...'):
