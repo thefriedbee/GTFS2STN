@@ -163,11 +163,6 @@ def generate_ts_edges(stop_times, G_obj):
         # node ids
         start_nid = f"{stop_i}_{ti:.0f}"
         end_nid = f"{stop_j}_{tj:.0f}"
-        # if i < 5:
-        #     print(start_nid)
-        #     print(end_nid)
-        #     print()
-        #     pass
         # add augment info
         G_obj.add_edge(stop_i, stop_j,
                        start_nid, end_nid,

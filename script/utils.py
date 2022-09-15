@@ -45,6 +45,22 @@ def show_stops_table(GTFS_OBJ, w=600, h=600):
 
 
 @st.cache(show_spinner=False, allow_output_mutation=True)
+def show_stops_given_df(stops, w=600, h=600):
+    m = folium.Map(location=[stops['stop_lat'].mean(), stops['stop_lon'].mean()], zoom_start=10)
+    for coords in stops[["stop_lat", "stop_lon", "stop_name", "stop_code", "stop_id"]].values.tolist():
+        # iframe = folium.IFrame(f"stop name: {coords[2]} <br> stop code: {coords[3]}")
+        # tooltip = folium.Popup(iframe, min_width=50, max_width=300)
+        folium.CircleMarker(
+            coords[:2],
+            tooltip=f"stop name: {coords[2]} <br> stop code: {coords[3]}",
+            popup=f"stop id: {coords[4]}",
+            radius=2,
+            weight=5,
+        ).add_to(m)
+    return m
+
+
+@st.cache(show_spinner=False, allow_output_mutation=True)
 def create_stops_map(GTFS_OBJ, w=600, h=600):
     m = GTFS_OBJ.display_stops_map(width=w, height=h)
     return m
@@ -128,7 +144,7 @@ def find_stops_neighbors_within_buffer(stops, bw_mile=0.25):
     return stops
 
 
-@st.cache(suppress_st_warning=True, show_spinner=False, allow_output_mutation=True)
+# @st.cache(suppress_st_warning=True, show_spinner=False, allow_output_mutation=True)
 def display_one_origin_map(stops, GRAPH_OBJ, one_source_access_dict, one_source_path_dict):
     stops_acc = pd.DataFrame.from_dict(one_source_access_dict, orient='index')
     stops_acc = stops_acc.reset_index()
@@ -198,7 +214,7 @@ def display_one_origin_map(stops, GRAPH_OBJ, one_source_access_dict, one_source_
 
 
 # get subset trips given service ids
-@st.cache(suppress_st_warning=True, show_spinner=False, allow_output_mutation=True)
+# @st.cache(suppress_st_warning=True, show_spinner=False, allow_output_mutation=True)
 def filter_trips_by_service_ids(GTFS_OBJ, service_ids):
     # service_ids: a list of service ids
     trips = GTFS_OBJ.dfs["trips.txt"]
@@ -207,7 +223,7 @@ def filter_trips_by_service_ids(GTFS_OBJ, service_ids):
     return trips_subset
 
 
-@st.cache(suppress_st_warning=True, show_spinner=False, allow_output_mutation=True)
+# @st.cache(suppress_st_warning=True, show_spinner=False, allow_output_mutation=True)
 def filter_stop_times_by_trip_ids(GTFS_OBJ, trip_ids):
     # trip_ids: a list of trip ids
     stop_times = GTFS_OBJ.dfs["stop_times.txt"]
@@ -216,14 +232,14 @@ def filter_stop_times_by_trip_ids(GTFS_OBJ, trip_ids):
     return stop_times_subset
 
 
-@st.cache(suppress_st_warning=True, show_spinner=False, allow_output_mutation=True)
+# @st.cache(suppress_st_warning=True, show_spinner=False, allow_output_mutation=True)
 def filter_stops_by_stop_ids(GTFS_OBJ, stop_ids):
     stops = GTFS_OBJ.dfs["stops.txt"]
     filt = stops["stop_id"].isin(stop_ids)
     return stops[filt]
 
 
-@st.cache(suppress_st_warning=True, show_spinner=False, allow_output_mutation=True)
+# @st.cache(suppress_st_warning=True, show_spinner=False, allow_output_mutation=True)
 def get_path_costs(GRAPH_OBJ, nodes_lst):
     # print("node_lst:", nodes_lst)
     if len(nodes_lst) == 0:

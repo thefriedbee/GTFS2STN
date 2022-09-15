@@ -14,7 +14,7 @@ import utils as ut
 st.write("Step 1. Select GTFS documents or upload your document")
 AGENCIES = ut.init_agencies()
 
-# init session states
+# init all session states at the beginning
 if 'b1_clicked' not in st.session_state:
     st.session_state.b1_clicked = False
 if 'b2_clicked' not in st.session_state:
@@ -78,12 +78,14 @@ def page_1():
     return gtfs_obj
 
 
-# results are recorded here in the global variable
-if "GTFS_OBJ" not in st.session_state.keys():
-    st.session_state["GTFS_OBJ"] = None
-if "GRAPH_OBJ" not in st.session_state.keys():
-    st.session_state["GRAPH_OBJ"] = None
+def init_page_1():
+    # results are recorded here in the global variable
+    if "GTFS_OBJ" not in st.session_state.keys():
+        st.session_state["GTFS_OBJ"] = None
+    if "GRAPH_OBJ" not in st.session_state.keys():
+        st.session_state["GRAPH_OBJ"] = None
+    st.session_state["GTFS_OBJ"] = page_1()
+    print("step 1. GTFS_OBJ", st.session_state["GTFS_OBJ"])
 
-st.session_state["GTFS_OBJ"] = page_1()
-print("step 1. GTFS_OBJ", st.session_state["GTFS_OBJ"])
-# Note: store results
+
+init_page_1()

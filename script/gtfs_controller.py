@@ -96,7 +96,6 @@ class GTFSController:
             ).add_to(m)
         return m
 
-
     def display_routes_map(self, m=None, width=400, height=400):
         if m is None:
             m = self.display_map_tile()
@@ -116,7 +115,7 @@ class GTFSController:
                             popup=lines_id[i],
                             tooltip=lines_id[i]).add_to(m)
         print("shapes printed!")
-        st_data = folium_static(m, width=width, height=height)
+        folium_static(m, width=width, height=height)
 
 
 

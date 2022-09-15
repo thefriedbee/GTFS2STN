@@ -12,9 +12,12 @@ from gtfs_graph import GTFS_Graph
 import utils as ut
 
 
-# GLOBAL VARIABLES
-GTFS_OBJ = st.session_state["GTFS_OBJ"]
-print("step2 GTFS_OBJ", GTFS_OBJ)
+def page_2_init():
+    global GTFS_OBJ
+    if "GTFS_OBJ" not in st.session_state.keys():
+        st.session_state["GTFS_OBJ"] = None
+    GTFS_OBJ = st.session_state["GTFS_OBJ"]
+    print("step2 GTFS_OBJ:", GTFS_OBJ)
 
 
 def page_2_2():
@@ -78,4 +81,6 @@ def page_2_2():
             st.subheader("'trip.txt' are not found!")
 
 
+page_2_init()
 page_2_2()
+

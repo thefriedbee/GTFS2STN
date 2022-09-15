@@ -14,12 +14,17 @@
 import streamlit as st
 from PIL import Image
 
-st.set_page_config(layout="wide")
-# create all global data holders
-if "GTFS_OBJ" not in st.session_state.keys():
-    st.session_state["GTFS_OBJ"] = None
-if "GRAPH_OBJ" not in st.session_state.keys():
-    st.session_state["GRAPH_OBJ"] = None
+
+def page_0_init():
+    st.set_page_config(layout="wide")
+    global GTFS_OBJ, GRAPH_OBJ
+    # create all global data holders
+    if "GTFS_OBJ" not in st.session_state.keys():
+        st.session_state["GTFS_OBJ"] = None
+    if "GRAPH_OBJ" not in st.session_state.keys():
+        st.session_state["GRAPH_OBJ"] = None
+    GTFS_OBJ = st.session_state["GTFS_OBJ"]
+    GRAPH_OBJ = st.session_state["GRAPH_OBJ"]
 
 
 def page_0():
@@ -46,5 +51,6 @@ def page_0():
     st.markdown("## TSNG: Generating Spatio-temporal transit network given *any* GTFS inputs")
 
 
+page_0_init()
 page_0()
 
