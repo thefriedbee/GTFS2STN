@@ -2,6 +2,7 @@ GTFS_inputs/CA_BayArea
 # Folder view configuration files
 .DS_Store
 Desktop.ini
+jupyter_script/
 
 # Thumbnail cache files
 ._*
