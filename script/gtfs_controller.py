@@ -24,13 +24,15 @@ class GTFSController:
         self.dfs = {}  # hold all data here
         self.load_txt_files()
         self.shapes_gdf = self.process_shapes()
-        self.route_shape = None
 
     def load_txt_files(self):
         # load txt files into memory
         for file in glob.glob(f"{self.root_dir}/*.txt"):
             fn = file.split('/')[-1]
             self.dfs[fn] = pd.read_csv(file)
+        # # change stops ids to string
+        # stops = self.dfs["stops.txt"]
+        # stops["stop_id"] = stops["stop_id"].astype(int)
 
     def process_shapes(self):
         df_shapes = self.dfs["shapes.txt"]
@@ -38,7 +40,8 @@ class GTFSController:
         # process list of coordinates to a LineString format
         def compact_shape(df):
             dst = df['shape_dist_traveled'].tolist()
-            pts = [Point(loc) for loc in zip(df.shape_pt_lon.tolist(), df.shape_pt_lat.tolist())]
+            pts = [Point(loc) for loc in zip(df.shape_pt_lon.tolist(), 
+                                             df.shape_pt_lat.tolist())]
             if len(pts) == 1:
                 print("one pts coords:", pts[0])
                 # a dumb line with no length for corner cases
@@ -50,8 +53,6 @@ class GTFSController:
         df_shapes = df_shapes.groupby(['shape_id']).apply(compact_shape)
         df_shapes.columns = ['dist_traveled', 'line']
         df_shapes = gpd.GeoDataFrame(df_shapes, geometry=df_shapes['line'])
-        # print("df_shapes head:")
-        # print(df_shapes.head(2))
         return df_shapes
 
     def display_table(self, fn, width, height):

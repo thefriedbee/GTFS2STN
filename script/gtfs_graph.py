@@ -25,12 +25,17 @@ class GTFS_Graph:
     
     def add_skeleton_nodes(self, stop_dict, times_info):
         stop_id = stop_dict["stop_id"]
+        # stop_id = str(stop_id)
         nodes_info = [(f"{stop_id}_{time_info}", stop_dict)
                       for i, time_info in enumerate(times_info)]
         self.G.add_nodes_from(nodes_info)
         self.nodes_time_map[stop_id] = SortedSet(times_info)
 
     def add_edge(self, stop_a, stop_b, node_a, node_b, t1=0, t2=0, properties=None):
+        # stop_a = str(stop_a)
+        # stop_b = str(stop_b)
+        # node_a = str(node_a)
+        # node_b = str(node_b)
         if properties is None:
             properties = {}
         self.G.add_edge(node_a, node_b, **properties)
@@ -80,7 +85,6 @@ class GTFS_Graph:
             for i in range(len(ts)):
                 t0 = ts[i]
                 t_ends = t0 + walk_ts
-                # print("t_ends:", t_ends)
                 # add edge for each neighbor
                 for j, nei_ID in enumerate(nei_IDs):
                     self.add_edge(stop_id, nei_ID,
@@ -88,13 +92,26 @@ class GTFS_Graph:
                                   properties={"tt": walk_ts[j], "wt": walk_ts[j]})
     
     # query shortest path given origin stop_id and departure time (in minutes)
+    # new strategy: create a new source node pointing at nearest point
     def query_origin_stop_time(self, stop_id, depart_min, cutoff):
-        # for now, round to the closest but earlier 15 minutes
-        depart_min = int(int(depart_min / 15) * 15)
         node_id_origin = f"{stop_id}_{depart_min:.0f}"
-        # shortest traveling time
+        # add one edge...
+        next_min = self.find_closest_next_time(stop_id, depart_min)
+        wait_min = next_min - depart_min
+        node_id_next = f"{stop_id}_{next_min:.0f}"
+        # add link (no need to track for this searching edge)
+        self.G.add_edge(node_id_origin, node_id_next,
+                        **{"tt": wait_min, "wt": wait_min})
+        # add dump link to same destination
+        self.G.add_edge(node_id_origin, f"{stop_id}_D",
+                        **{"tt": 0, "wt": 0})
+        # start searching...
         return nx.single_source_dijkstra(self.G, node_id_origin,
                                          cutoff=cutoff, weight="tt")
+    
+    def find_closest_next_time(self, stop_id, time_min):
+        idx = self.nodes_time_map[stop_id].bisect_left(time_min)
+        return self.nodes_time_map[stop_id][idx]  # return the next time
     
     # get shortest travel times from one stop to the others
     def get_shortest_tts(self, one_source_results):
@@ -153,6 +170,9 @@ def add_nodes_all_stops(stops, G_obj, t_step=15):
 def generate_ts_edges(stop_times, G_obj):
     stop_times['arrive_minute'] = pd.to_timedelta(stop_times['arrival_time']).dt.seconds/60
     stop_times['departure_minute'] = pd.to_timedelta(stop_times['departure_time']).dt.seconds/60
+    # set time info to whole minute
+    stop_times['arrive_minute'] =  stop_times['arrive_minute'].astype("float32")
+    stop_times['departure_minute'] = stop_times['departure_minute'].astype("float32")
     # ser_1trip_stops: trips stops of one trip_id
     stop_ids = stop_times['stop_id'].tolist()
     arr_ts = stop_times['arrive_minute'].tolist()
@@ -170,7 +190,7 @@ def generate_ts_edges(stop_times, G_obj):
                        properties={"tt": tj-ti, "wt": 0})
 
 
-# add all edges from stop_times.txt dataframe
+# add all edges+nodes from stop_times.txt dataframe
 def add_edges_all_stop_times(stop_times, G_obj):
     stop_times.groupby(["trip_id"]).apply(generate_ts_edges, G_obj)
 
