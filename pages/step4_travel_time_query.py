@@ -72,10 +72,6 @@ def page_4():
 
 def page_4_execute(stops, stop_id, depart_hr, max_tt):
     m = None
-    for key in GRAPH_OBJ.nodes_time_map:
-        if not isinstance(key, str):
-            stop_id = int(stop_id)
-        break
     # start building network and query shortest paths
     if (st.button("Start analysis & plot results") or
             st.session_state.b4_1_clicked and
@@ -83,8 +79,11 @@ def page_4_execute(stops, stop_id, depart_hr, max_tt):
         st.session_state["b4_1_clicked"] = True
         st.session_state["stop_id"] = stop_id
 
+        for key in GRAPH_OBJ.nodes_time_map:
+            if not isinstance(key, str):
+                stop_id = int(stop_id)
+            break
         my_bar = st.progress(0)
-
         with st.spinner('Analyzing shortest travel time to other stops...'):
             # find shortest paths from stop_id
             one_source_paths = GRAPH_OBJ.query_origin_stop_time(

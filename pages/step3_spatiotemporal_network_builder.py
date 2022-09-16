@@ -18,7 +18,7 @@ import pandas as pd
 import geopandas as gpd
 import streamlit as st
 
-
+st.set_page_config(layout="wide", page_title="GTFS2STN", page_icon="🚌")
 # init configuration data holder
 network_config_info = {}
 

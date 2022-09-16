@@ -10,7 +10,7 @@ sys.path.append("..")
 from script.gtfs_controller import GTFSController
 import script.utils as ut
 
-# st.set_page_config(layout="wide")
+st.set_page_config(layout="wide", page_title="GTFS2STN", page_icon="🚌")
 st.write("Step 1. Select GTFS documents or upload your document")
 AGENCIES = ut.init_agencies()
 
