@@ -62,7 +62,8 @@ def page_0():
     with col2:
         image = image_loader('images/GTFS_introduction.png')
         st.image(image,
-                 caption='The core relationship between GTFS tables')
+                 caption='The core relationship between GTFS tables \n '
+                         '(source: https://github.com/tyleragreen/gtfs-schema)')
     st.markdown("## Introducing Spatio-temporal network: a directed diagram describing transit traffic")
     st.markdown("""
     Unlike traffic network, the edges are links are changing over time of the day.
