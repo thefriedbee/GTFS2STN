@@ -1,0 +1,15 @@
+numpy
+pandas
+geopandas
+shapely
+matplotlib
+plotly
+folium
+branca
+streamlit
+streamlit-folium
+streamlit-aggrid
+scipy
+scikit-learn
+networkx
+sortedcontainers
