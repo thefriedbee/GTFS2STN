@@ -1,0 +1,2 @@
+agency_id,agency_name,agency_url,agency_timezone,agency_lang,agency_phone,agency_fare_url
+WeGo Public Transit,WeGo Public Transit,http://www.wegotransit.com,America/Chicago,en,615-862-8833,
