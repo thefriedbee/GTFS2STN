@@ -2,7 +2,9 @@
 Build spatio-temporal network based on needs
 """
 import json
+import pickle
 import networkx as nx
+from networkx.readwrite import json_graph
 import streamlit as st
 
 from script.GTFSGraph import GTFSGraph
@@ -77,11 +79,14 @@ def page_3_execute():
                 GRAPH_OBJ,
             )
 
+            # json_graph.node_link_data(GRAPH_OBJ.G)
+            # nx.write_gpickle(GRAPH_OBJ.G, "temp_graph.pickle")
+
             st.session_state["GRAPH_OBJ"] = GRAPH_OBJ
             st.download_button(
-                "Download network in JSON format!",
-                data=json.dumps(nx.to_dict_of_lists(GRAPH_OBJ.G)),
-                file_name='My_GTFS_Graph.json'
+                "Download network/graph in Python's pickle format!",
+                data=pickle.dumps(GRAPH_OBJ.G),
+                file_name='My_GTFS_Graph.pickle',
             )
         st.success('Network built successfully!')
         if "stops" not in st.session_state:
