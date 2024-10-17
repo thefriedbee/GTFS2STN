@@ -1,5 +1,6 @@
 numpy
 pandas
+contextily
 geopandas
 streamlit
 streamlit-folium
