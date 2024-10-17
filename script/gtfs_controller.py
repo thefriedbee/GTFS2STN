@@ -187,25 +187,32 @@ def filter_stops_by_stop_ids(
     return GTFS_OBJ.dfs["stops.txt"]
 
 
-def filter_service_id_by_weekday(
+def filt_service_id_by_weekday(
         services: pd.DataFrame,
-        sel_weekdays: list[str],  # selected weekdays
-) -> pd.DataFrame:
+        sel_weekday: str,  # selected weekdays
+):
     # services = GTFS_OBJ.dfs["calendar.txt"]
     dfs = []
-    for wd in sel_weekdays:
-        filt = (services[wd] == 1)
-        dfs.append(services.loc[filt, :])
-
-    services = pd.concat(dfs, axis=1)
-    return services
+    filt = (services[sel_weekday] == 1)
+    return filt
 
 
 def filter_service_id_by_date(
     services: pd.DataFrame,
     the_date: datetime.datetime | None,
 ) -> pd.DataFrame:
+    WEEKDAYS = {
+        0: "monday",
+        1: "tuesday",
+        2: "wednesday",
+        3: "thursday",
+        4: "friday",
+        5: "saturday",
+        6: "sunday"
+    }
     the_date = pd.to_datetime(the_date)
+    the_weekday = WEEKDAYS[the_date.weekday()]
+
     services["start_date"] = pd.to_datetime(
         services["start_date"], format="%Y%m%d"
     )
@@ -218,6 +225,11 @@ def filter_service_id_by_date(
     if the_date is not None:
         filts += [services["start_date"] <= the_date]
         filts += [services["end_date"] >= the_date]
+        # also, filter by weekday...
+        filts += [filt_service_id_by_weekday(services, the_weekday)]
+    else:
+        st.error(f"{the_date} is not a valid date for analysis")
+    # get weekday also...
 
     concat_and = lambda x, y: x & y
     filt = reduce(concat_and, filts)
@@ -227,6 +239,9 @@ def filter_service_id_by_date(
     print(filts[0].sum())
     print(filts[1].sum())
     print(filt.sum())
+
+    if filt.sum() == 0:
+        st.error("no feasible services for that date found.")
 
     return services.loc[filt, :]
 

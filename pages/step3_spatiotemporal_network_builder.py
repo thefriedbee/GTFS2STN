@@ -8,8 +8,7 @@ import script.graph_pipeline as graph_pipeline
 from script.GTFSGraph import GTFSGraph
 from script.gtfs_controller import (
     build_network,
-    filter_service_id_by_date,
-    filter_service_id_by_weekday
+    filter_service_id_by_date
 )
 
 from script.util.table_viewer import show_static_table, show_static_table_simple
@@ -47,14 +46,7 @@ def page_3():
     st.title("Step 3. Build transit network")
     col1, col2 = st.columns([1, 4])
     with col1:
-        # part (1): start date - end date
-        weekdays = [
-            "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"
-        ]
-        sel_weekdays = st.multiselect("weekday", weekdays, weekdays[0])
-        print(f"selected weekdays: {sel_weekdays}")
-
-        # part (2): choose a specific date range for analysis
+        # part (2): choose a specific date for analysis
         the_date = st.date_input("the date to evaluate", value=None)
 
         # (2) choose walk buffer (maximal walking distance)
@@ -69,7 +61,6 @@ def page_3():
         )
 
         # update configuration information:
-        network_config_info["weekdays"] = sel_weekdays
         network_config_info["date"] = the_date
         network_config_info["bw_mile"] = bw_mile
         network_config_info["walk_speed"] = walk_speed
@@ -85,17 +76,12 @@ def page_3_execute():
     if (st.button("Generate Transit Network over space and time!") or
             st.session_state["b3_1_clicked"]):
         # unload parameters
-        sel_weekdays = network_config_info["weekdays"]
         the_date = network_config_info["date"]
         if the_date is None:
             st.error("should fill a date for analysis...")
 
         # filter the data set...
         services = GTFS_OBJ.dfs["calendar.txt"].copy()
-        services = filter_service_id_by_weekday(
-            services,
-            sel_weekdays
-        )
         services = filter_service_id_by_date(
             services=services,
             the_date=the_date
@@ -107,7 +93,7 @@ def page_3_execute():
         st.session_state["b3_1_clicked"] = True
         print("network_config_info:", network_config_info)
 
-        with st.spinner('Building transit network...'):
+        with st.spinner(f'Building transit network for the date {the_date}...'):
             GRAPH_OBJ = st.session_state["GRAPH_OBJ"]
             GRAPH_OBJ, stops = build_network(network_config_info, GTFS_OBJ, GRAPH_OBJ)
             st.session_state["GRAPH_OBJ"] = GRAPH_OBJ
