@@ -1,0 +1,30 @@
+route_id,agency_id,route_short_name,route_long_name,route_desc,route_type,route_url,route_color,route_text_color
+5558,224,"10","10 Sequoyah Hills",10 Sequoyah Hills,3,,FFFFFF,FFFFFF
+5559,224,"11","11 Kingston Pike",11 Kingston Pike,3,,FF0000,FFFFFF
+5560,224,"12","12 Western Avenue",12 Western Avenue,3,,339900,FFFFFF
+5561,224,"13 Beaumont Connector","13 Beaumont Connector",13 Beaumont Connector,3,,FFBB33,000000
+5562,224,"16 Cedar Bluff Connector","16 Cedar Bluff Connector",16 Cedar Bluff Connector,3,,002673,FFFFFF
+5563,224,"17","17 Sutherland/Bearden",17 Sutherland/Bearden,3,,73B2FF,000000
+5564,224,"19","19 Lakeshore/Lonas Connector",19 Lakeshore/Lonas Connector,3,,339900,FFFFFF
+5565,224,"20 Central Street","20 Central Street",20 Central Street,3,,FF0000,FFFFFF
+5566,224,"21","21 Lincoln Park",21 Lincoln Park,3,,002673,FFFFFF
+5567,224,"22 Broadway","22 Broadway",22 Broadway,3,,FF0000,FFFFFF
+5568,224,"23","23 Millertown/Fairmont",23 Millertown/Fairmont,3,,339900,FFFFFF
+5569,224,"24","24 Inskip/Breda",24 Inskip/Breda,3,,002673,FFFFFF
+5570,224,"30","30 Parkridge",30 Parkridge,3,,73B2FF,000000
+5571,224,"31","31 Magnolia Avenue",31 Magnolia Avenue,3,,FF0000,FFFFFF
+5572,224,"32","32 Dandridge Avenue",32 Dandridge Avenue,3,,339900,FFFFFF
+5573,224,"33","33 Martin Luther King Jr Avenue",33 Martin Luther King Jr Avenue,3,,FFBB33,000000
+5574,224,"34 Burlington","34 Burlington",34 Burlington,3,,002673,FFFFFF
+5575,224,"40","40 South Knoxville",40 South Knoxville,3,,002673,FFFFFF
+5576,224,"41 Chapman Highway","41 Chapman Highway",41 Chapman Highway,3,,FF0000,FFFFFF
+5577,224,"42","42 UT/Fort Sanders Hospitals",42 UT/Fort Sanders Hospitals,3,,339900,FFFFFF
+5578,224,"44","44 University Park",44 University Park,3,,FF5809,FFFFFF
+5579,224,"45","45 Vestal",45 Vestal,3,,FFBB33,000000
+5580,224,"81","81 Orange Line Trolley (WKD)",81 Orange Line Trolley (WKD),3,,FD8C39,000000
+5581,224,"83","83 Green Line Trolley (WKD)",83 Green Line Trolley (WKD),3,,008000,FFFFFF
+5582,224,"85 Blue Line Trolley (WKD)","85 Blue Line Trolley (WKD)",85 Blue Line Trolley (WKD),3,,0000FF,FFFFFF
+5583,224,"90","90 Crosstown Connector",90 Crosstown Connector,3,,A900E6,FFFFFF
+5584,224,"82","82 Orange Line Trolley (SAT)",82 Orange Line Trolley (SAT),3,,FD8C39,000000
+5585,224,"84","84 Green Line Trolley (SAT)",84 Green Line Trolley (SAT),3,,008000,FFFFFF
+5586,224,"86 Blue Line Trolley (SAT)","86 Blue Line Trolley (SAT)",86 Blue Line Trolley (SAT),3,,0000FF,FFFFFF

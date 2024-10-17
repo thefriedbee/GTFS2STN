@@ -1,0 +1,14 @@
+numpy
+pandas
+geopandas
+streamlit
+streamlit-folium
+streamlit-aggrid
+folium
+branca
+scikit-learn
+networkx
+rustworkx
+matplotlib
+sortedcontainers
+plotly
