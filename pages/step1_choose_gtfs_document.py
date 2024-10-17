@@ -33,7 +33,6 @@ def load_gtfs(pth_unzipeed_folder):
     return GTFSController(root_dir=pth_unzipeed_folder)
 
 
-# @st.cache_data()
 def page_1():
     gtfs_obj = None
     col1, col2 = st.columns(2)

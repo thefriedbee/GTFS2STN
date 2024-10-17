@@ -7,7 +7,6 @@ import numpy as np
 import rustworkx as rx
 import geopandas as gpd
 import pandas as pd
-# from scipy.spatial import cKDTree
 from sklearn.neighbors import BallTree
 
 import script.gtfs_controller as gtfs
