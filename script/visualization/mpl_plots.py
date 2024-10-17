@@ -1,10 +1,7 @@
 """
 Contains some simple Matplotlib plots to generate results...
 """
-import os
-import sys
-
-import networkx as nx
+import rustworkx as rx
 import numpy as np
 import pandas as pd
 import geopandas as gpd
@@ -63,7 +60,7 @@ def time_space_plot_given_1block(df_stop_times, df_trips, block_id):
     return ax
 
 
-def plot_subgraph(G: nx.DiGraph):
+def plot_subgraph(G: rx.PyDiGraph):
     def get_pos(G, node):
         node = G.nodes[node]
         x, y, z = node['lon'], node['lat'], node['time']

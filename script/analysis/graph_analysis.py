@@ -4,7 +4,7 @@ Contains analysis methods using networkx module
 import sys
 
 import numpy as np
-import networkx as nx
+import rustworkx as rx
 import geopandas as gpd
 import pandas as pd
 # from scipy.spatial import cKDTree
@@ -50,9 +50,9 @@ def find_stops_neighbors_within_buffer(
     return stops
 
 
-def get_memory_usage(graph: nx.graph):
-    edge_mem = sum([sys.getsizeof(e) for e in graph.G.edges])
-    node_mem = sum([sys.getsizeof(n) for n in graph.G.nodes])
+def get_memory_usage(graph: rx.PyDiGraph):
+    edge_mem = sum([sys.getsizeof(e) for e in graph.edges()])
+    node_mem = sum([sys.getsizeof(n) for n in graph.nodes()])
 
     print("Edge memory (MB):", edge_mem / 1024 / 1024)
     print("Node memory (MB):", node_mem / 1024 / 1024)
@@ -78,7 +78,6 @@ def get_subgraph(
         ts = ts[filt]
         origin_nodes = [f"{stop_id}_{t}" for t in ts]
         # add properties for each node
-        # nx.set_node_attributes(G, attrs)
         nodes += origin_nodes
     subgraph = G_obj.G.subgraph(nodes)
     # add attributes for each node
@@ -150,19 +149,19 @@ def merge_nodes_to_stop_ids(stops, G_subgraph):
     return stops_sel
 
 
-def get_graph_stats(G: nx.DiGraph) -> None:
-    num_nodes = len(G.nodes)
-    num_edges = len(G.edges)
-    num_compos = nx.number_weakly_connected_components(G)
+def get_graph_stats(G: rx.PyDiGraph) -> None:
+    num_nodes = len(G.nodes())
+    num_edges = len(G.edges())
+    num_compos = rx.number_weakly_connected_components(G)
 
     print(f"Number of nodes: {num_nodes}")
     print(f"Number of edges: {num_edges}")
     print(f"Number of weakly connected components: {num_compos}")
 
 
-def get_graph_memory(G: nx.DiGraph) -> None:
-    edge_mem = sum([sys.getsizeof(e) for e in G.edges])
-    node_mem = sum([sys.getsizeof(n) for n in G.nodes])
+def get_graph_memory(G: rx.PyDiGraph) -> None:
+    edge_mem = sum([sys.getsizeof(e) for e in G.edges()])
+    node_mem = sum([sys.getsizeof(n) for n in G.nodes()])
 
     print(f"Edge memory (MB): {edge_mem / 1024 / 1024:.2f}")
     print(f"Node memory (MB): {node_mem / 1024 / 1024:.2f}")
@@ -170,7 +169,7 @@ def get_graph_memory(G: nx.DiGraph) -> None:
 
 
 # used for plotting it using Plotly
-def get_subgraph_dfs(G: nx.DiGraph):
+def get_subgraph_dfs(G: rx.PyDiGraph):
     def get_pos(G, node):
         node = G.nodes[node]
         x, y, z = node['lon'], node['lat'], node['time']
