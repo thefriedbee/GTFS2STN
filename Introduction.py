@@ -13,7 +13,9 @@
 
 import streamlit as st
 import streamlit.components.v1 as components
+import streamlit_mermaid as stmd
 from PIL import Image
+from script.basic_info import mermaid_text
 
 
 def page_0_init():
@@ -59,10 +61,11 @@ def page_0():
          > -- https://gtfs.org/
         """)
     with col2:
-        image = image_loader('images/GTFS_introduction.png')
-        st.image(image,
-                 caption='The core relationship between GTFS tables \n '
-                         '(source: https://github.com/tyleragreen/gtfs-schema)')
+        # image = image_loader('images/GTFS_introduction.png')
+        # st.image(image,
+        #          caption='The core relationship between GTFS tables \n '
+        #                  '(source: https://github.com/tyleragreen/gtfs-schema)')
+        stmd.st_mermaid(code=mermaid_text)
     st.markdown("## Introducing Spatio-temporal network: a directed diagram describing transit traffic")
     st.markdown("""
     Unlike traffic network, the edges are links are changing over time of the day.
