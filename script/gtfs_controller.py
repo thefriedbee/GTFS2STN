@@ -181,6 +181,7 @@ def filter_stops_by_stop_ids(
     print("num of stop ids: ", len(stop_ids))
     stops = GTFS_OBJ.dfs["stops.txt"]
     filt = stops["stop_id"].isin(stop_ids)
+    print("filt sum:", filt.sum())
     # only keep filtered stops...
     GTFS_OBJ.dfs["stops.txt"] = stops[filt]
     return GTFS_OBJ.dfs["stops.txt"]
