@@ -178,6 +178,7 @@ def filter_stops_by_stop_ids(
         GTFS_OBJ: GTFSController,
         stop_ids: list[int],
 ) -> pd.DataFrame:
+    print("num of stop ids: ", len(stop_ids))
     stops = GTFS_OBJ.dfs["stops.txt"]
     filt = stops["stop_id"].isin(stop_ids)
     # only keep filtered stops...
