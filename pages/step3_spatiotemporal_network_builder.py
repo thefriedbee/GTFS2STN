@@ -93,7 +93,7 @@ def page_3_execute():
         st.session_state["b3_1_clicked"] = True
         print("network_config_info:", network_config_info)
 
-        with st.spinner(f'Building transit network for the date {the_date}...'):
+        with st.spinner(f'Building transit network for the date {the_date}, {the_date.weekday()}...'):
             GRAPH_OBJ = st.session_state["GRAPH_OBJ"]
             GRAPH_OBJ, stops = build_network(network_config_info, GTFS_OBJ, GRAPH_OBJ)
             st.session_state["GRAPH_OBJ"] = GRAPH_OBJ

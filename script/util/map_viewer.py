@@ -1,13 +1,13 @@
 """
 Contains function to generate folium in the app
 """
+import pandas as pd
+import geopandas as gpd
+
 import folium
 from folium.plugins import MousePosition
 from folium.plugins import Draw
 from streamlit_folium import st_folium, folium_static
-
-import pandas as pd
-import geopandas as gpd
 
 from script.gtfs_controller import GTFSController
 import script.visualization.folium_plots as folium_plots

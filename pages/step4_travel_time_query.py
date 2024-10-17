@@ -6,7 +6,7 @@ import numpy as np
 import geopandas as gpd
 import streamlit as st
 
-from streamlit_folium import st_folium, folium_static
+from streamlit_folium import folium_static
 
 import script.util.map_viewer as map_ut
 import script.util.df_utils as df_ut

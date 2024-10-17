@@ -220,10 +220,8 @@ class GTFSGraph:
         nei_idxs = one_stop_df["neighbors"]  # all neighbors index
         nei_dists = one_stop_df["dists"]  # distance in miles
         nei_stop_ids = stops_df["stop_id"].iloc[nei_idxs].to_list()
-        # print("nei_stop_ids", nei_stop_ids)
         nei_wts = np.array(nei_dists) / walk_speed * 60  # walking time (in minutes)
         depart_mins = depart_min + nei_wts
-        # print("depart_mins:", depart_mins)
 
         # from stop to next arrived vehicle
         next_mins = np.array([
@@ -239,7 +237,6 @@ class GTFSGraph:
         ]
 
         # process source info (add source node if it doesn't exist...)
-        one_node_id = f"{stop_id}_{depart_min:.0f}"
         the_origin_nid = self.query_node_or_create(stop_id=stop_id, tod=int(depart_min))
         # print(f"source node: {one_node_id}------{the_origin_nid}")
         # print("node info: ", self.G.get_node_data(the_origin_nid))
