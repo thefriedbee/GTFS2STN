@@ -3,3 +3,5 @@
 .idea
 .pytest_cache
 __pycache__/
+.rustnetworkx_test.ipynb
+jupyter_script/
