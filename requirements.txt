@@ -13,3 +13,5 @@ matplotlib
 sortedcontainers
 plotly
 streamlit-mermaid
+utm
+pyproj
