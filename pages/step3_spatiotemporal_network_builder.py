@@ -8,7 +8,7 @@ import script.graph_pipeline as graph_pipeline
 from script.GTFSGraph import GTFSGraph
 from script.gtfs_controller import (
     build_network,
-    filter_service_id_by_date_range,
+    filter_service_id_by_date,
     filter_service_id_by_weekday
 )
 
@@ -55,8 +55,7 @@ def page_3():
         print(f"selected weekdays: {sel_weekdays}")
 
         # part (2): choose a specific date range for analysis
-        start_date = st.date_input("start date", value=None)
-        end_date = st.date_input("end date", value=None)
+        the_date = st.date_input("the date to evaluate", value=None)
 
         # (2) choose walk buffer (maximal walking distance)
         bw_mile = st.slider(
@@ -71,7 +70,7 @@ def page_3():
 
         # update configuration information:
         network_config_info["weekdays"] = sel_weekdays
-        network_config_info["dates"] = (start_date, end_date)
+        network_config_info["date"] = the_date
         network_config_info["bw_mile"] = bw_mile
         network_config_info["walk_speed"] = walk_speed
     with col2:  # show service id table to select
@@ -87,9 +86,9 @@ def page_3_execute():
             st.session_state["b3_1_clicked"]):
         # unload parameters
         sel_weekdays = network_config_info["weekdays"]
-        start_date, end_date = network_config_info["dates"]
-        if start_date is None or end_date is None:
-            st.error("should fill start/end dates...")
+        the_date = network_config_info["date"]
+        if the_date is None:
+            st.error("should fill a date for analysis...")
 
         # filter the data set...
         services = GTFS_OBJ.dfs["calendar.txt"].copy()
@@ -97,10 +96,9 @@ def page_3_execute():
             services,
             sel_weekdays
         )
-        services = filter_service_id_by_date_range(
+        services = filter_service_id_by_date(
             services=services,
-            start_date=start_date,
-            end_date=end_date
+            the_date=the_date
         )
         # selected service ids
         sel_sids = services["service_id"].tolist()

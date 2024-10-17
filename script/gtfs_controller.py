@@ -199,13 +199,11 @@ def filter_service_id_by_weekday(
     return services
 
 
-def filter_service_id_by_date_range(
+def filter_service_id_by_date(
     services: pd.DataFrame,
-    start_date: datetime.datetime | None,
-    end_date: datetime.datetime | None,
+    the_date: datetime.datetime | None,
 ) -> pd.DataFrame:
-    start_date = pd.to_datetime(start_date)
-    end_date = pd.to_datetime(end_date)
+    the_date = pd.to_datetime(the_date)
     services["start_date"] = pd.to_datetime(
         services["start_date"], format="%Y%m%d"
     )
@@ -215,14 +213,14 @@ def filter_service_id_by_date_range(
 
     filts = []
     # the queried time range is totally covered by the time range...
-    if start_date is not None:
-        filts += [services["start_date"] <= start_date]
-    if end_date is not None:
-        filts += [services["end_date"] >= end_date]
+    if the_date is not None:
+        filts += [services["start_date"] <= the_date]
+        filts += [services["end_date"] >= the_date]
 
     concat_and = lambda x, y: x & y
     filt = reduce(concat_and, filts)
 
+    print("the date for analysis:", the_date)
     print("filts")
     print(filts[0].sum())
     print(filts[1].sum())
