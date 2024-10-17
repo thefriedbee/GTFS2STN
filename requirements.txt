@@ -7,6 +7,7 @@ streamlit-aggrid
 folium
 branca
 scikit-learn
+shapely
 networkx
 rustworkx
 matplotlib
