@@ -9,7 +9,7 @@ If you use the tool, consider cite the following paper:
 
 ## Run app using docker (recommented way)
 
-Download the docker file with command:
+Download the docker file from DockerHub with the following command:
 ```
 docker pull friedbee/gtfs2stn:latest
 ```
