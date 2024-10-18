@@ -5,12 +5,21 @@ network (STN) for shortest path analysis.
 If you use the tool, consider cite the following paper:
 - [*GTFS2STN: Analyzing GTFS Transit Data By Generating Spatiotemporal Transit Network*](https://arxiv.org/abs/2405.02760)
 
-There are 3 ways to use the app:
-- Method 1 (online version): For online version (beta), please visit: https://gtfs2stn.streamlit.app/
-  - The app is memory-consuming. Free-tier Streamlit Cloud may collapse because of passing the 1GB memory limits. 
-- Method 2 (local run): Download the code and run it locally.
-- Method 3 (local run with Docker): Download the Docker file to directly running the app locally.
+## quick explore (please visit: https://gtfs2stn.streamlit.app/): 
 
+## Run app using docker (recommented way)
+
+Download the docker file with command:
+```
+docker pull friedbee/gtfs2stn:latest
+```
+
+Then, run the docker container using the command:
+```
+docker run -p 8501:8501 friedbee/gtfs2stn
+```
+
+After that, visit the following website (http://localhost:8501)
 
 # Recent updates
 - October, 2024 (version 2.0)

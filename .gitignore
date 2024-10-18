@@ -7,3 +7,4 @@ __pycache__/
 jupyter_script/
 Dockerfile
 docker_img
+rustnetworkx_test.ipynb
