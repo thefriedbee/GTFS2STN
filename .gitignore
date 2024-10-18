@@ -5,3 +5,4 @@
 __pycache__/
 .rustnetworkx_test.ipynb
 jupyter_script/
+Dockerfile
