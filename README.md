@@ -7,12 +7,14 @@ If you use the tool, consider cite the following paper:
 
 ## quick explore (please visit: https://gtfs2stn.streamlit.app/): 
 
-## Run app using docker (recommented way)
+## Run app using docker (recommended way)
 
 Download the docker file from DockerHub with the following command:
 ```
 docker pull friedbee/gtfs2stn:latest
 ```
+
+You could view the image settings using the following link: https://hub.docker.com/layers/friedbee/gtfs2stn/latest/images/sha256:fe81c3cfdcf022fe6b56b540e44f5a8c37e62aa0c99f912484469ec452a21f91?uuid=4F0A5E81-8B5D-4335-8A84-199956C16020
 
 Then, run the docker container using the command:
 ```
