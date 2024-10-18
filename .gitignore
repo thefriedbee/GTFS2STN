@@ -8,3 +8,4 @@ jupyter_script/
 Dockerfile
 docker_img
 rustnetworkx_test.ipynb
+GTFS_inputs/NY_NewYork_MTA
