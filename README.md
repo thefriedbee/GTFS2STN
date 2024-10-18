@@ -1,13 +1,16 @@
 # GTFS2STN application
+An application loads General Transit Feed Specification (GTFS) transit file and convert it to spatio-temporal
+network (STN) for shortest path analysis.
 
 If you use the tool, consider cite the following paper:
 - [*GTFS2STN: Analyzing GTFS Transit Data By Generating Spatiotemporal Transit Network*](https://arxiv.org/abs/2405.02760)
 
-Load GTFS transit file and convert it to spatio-temporal network (STN) for shortest path analysis.
+There are 3 ways to use the app:
+- Method 1 (online version): For online version (beta), please visit: https://gtfs2stn.streamlit.app/
+  - The app is memory-consuming. Free-tier Streamlit Cloud may collapse because of passing the 1GB memory limits. 
+- Method 2 (local run): Download the code and run it locally.
+- Method 3 (local run with Docker): Download the Docker file to directly running the app locally.
 
-For current (beta) version, please visit: https://gtfs2stn.streamlit.app/
-- Free-tier Streamlit Cloud is used for servicing this app. So, please wait for several seconds for rebooting.
-As a service using a lot of memory, program may collapse if multiple users are using the application at the same time.
 
 # Recent updates
 - October, 2024 (version 2.0)
