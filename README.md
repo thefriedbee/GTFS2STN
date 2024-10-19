@@ -7,7 +7,7 @@ If you use the tool, consider cite the following *paper*:
 
 ## Quick explore online (please visit: https://gtfs2stn.streamlit.app/): 
 
-Demo ideo link: 
+Youtube video demo link: 
 
 [![Demo video](images/yt_thumbnail.jpg)](http://www.youtube.com/watch?v=-YUY3Q0g4og&t=2s "Demonstrating GTFS2STN")
 
