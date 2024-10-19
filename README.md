@@ -9,7 +9,7 @@ If you use the tool, consider cite the following *paper*:
 
 Demo ideo link: 
 
-[![Demo video](https://img.youtube.com/vi/-YUY3Q0g4og&t=2s/0.jpg)](https://www.youtube.com/watch?v=-YUY3Q0g4og&t=2s)
+[![Demo video](images/yt_thumbnail.jpg)](http://www.youtube.com/watch?v=-YUY3Q0g4og&t=2s "Demonstrating GTFS2STN")
 
 ## Run app using docker (recommended way)
 
