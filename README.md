@@ -2,10 +2,12 @@
 An application loads General Transit Feed Specification (GTFS) transit file and convert it to spatio-temporal
 network (STN) for shortest path analysis.
 
-If you use the tool, consider cite the following paper:
+If you use the tool, consider cite the following *paper*:
 - [*GTFS2STN: Analyzing GTFS Transit Data By Generating Spatiotemporal Transit Network*](https://arxiv.org/abs/2405.02760)
 
 ## Quick explore online (please visit: https://gtfs2stn.streamlit.app/): 
+
+Demo ideo link: [Demo video](https://youtu.be/-YUY3Q0g4og)
 
 ## Run app using docker (recommended way)
 
