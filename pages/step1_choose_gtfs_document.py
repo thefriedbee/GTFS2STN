@@ -33,41 +33,55 @@ def load_gtfs(pth_unzipeed_folder):
     return GTFSController(root_dir=pth_unzipeed_folder)
 
 
+@st.fragment()
 def page_1():
     gtfs_obj = None
-    col1, col2 = st.columns(2)
-    with col1:
-        # step (1). Option 1. Choose existed files
-        file_option = st.selectbox(
-            "Option 1: Select existed file for analysis",
-            options=AGENCIES
-        )
-        if st.button('Confirm & Start Analysis!', on_click=call_back_b1) or st.session_state.b1_clicked:
-            FOLDER_PTH = f"GTFS_inputs/{file_option}"
-            with st.spinner('Processing GTFS documents...'):
-                gtfs_obj = load_gtfs(FOLDER_PTH)
-            st.success('GTFS successfully loaded!')
-    with col2:
-        # step (1). Option 2. Upload or select your GTFS document for analysis
-        uploaded_file = st.file_uploader("Option 2: upload your GTFS document", type="zip")
-        if uploaded_file is not None:
-            io_tools.extract_zipped_file(uploaded_file)
-            if st.button(
-                    'Analyze uploaded zipped file!', on_click=call_back_b2
-            ) or st.session_state.b2_clicked:
-                try:
-                    FOLDER_PTH = f"GTFS_inputs/{uploaded_file.name}"
-                except Exception:
-                    st.warning("Please upload zipped file in the first place.")
+    with st.form(key='file_option_form'):
+        confirm_message = st.empty()
+        FOLDER_PTH = None
 
-                with st.spinner('Processing GTFS documents...'):
+        col1, col2 = st.columns(2)
+        with col1:
+            # step (1). Option 1. Choose existed files
+            file_option = st.selectbox(
+                "Option 1: Select existed file for analysis",
+                options=AGENCIES
+            )
+            FOLDER_PTH = f"GTFS_inputs/{file_option}"
+        with col2:
+            # step (1). Option 2. Upload or select your GTFS document for analysis
+            uploaded_file = st.file_uploader("Option 2: upload your GTFS document", type="zip")
+            if uploaded_file is not None:
+                io_tools.extract_zipped_file(uploaded_file)
+                if st.button(
+                        'Analyze uploaded zipped file!', on_click=call_back_b2
+                ) or st.session_state.b2_clicked:
                     try:
-                        gtfs_obj = load_gtfs(FOLDER_PTH)
-                        st.success('GTFS successfully loaded!')
+                        FOLDER_PTH = f"GTFS_inputs/{uploaded_file.name}"
                     except Exception:
-                        st.warning(
-                            "Cannot process uploaded file, please check if data formats & file names are correct")
-        return gtfs_obj
+                        confirm_message.warning("Please upload zipped file in the first place.")
+
+                    with st.spinner('Processing GTFS documents...'):
+                        try:
+                            gtfs_obj = load_gtfs(FOLDER_PTH)
+                            confirm_message.success('GTFS successfully loaded!')
+                        except Exception:
+                            confirm_message.warning(
+                                "Cannot process uploaded file, please check if data formats & file names are correct")
+        
+        # confirm analysis
+        submit_button = st.form_submit_button('Confirm & Start Analysis!', on_click=call_back_b1)
+
+        # logic to handle form submission
+        if submit_button or st.session_state.b1_clicked:
+            with st.spinner('Processing GTFS documents...'):
+                try:
+                    gtfs_obj = load_gtfs(FOLDER_PTH)
+                    st.session_state["GTFS_OBJ"] = gtfs_obj
+                except Exception:
+                    confirm_message.warning(
+                        "Cannot process uploaded file, please check if data formats & file names are correct")
+            confirm_message.success('GTFS successfully loaded!')
 
 
 def run_step_1():
@@ -76,7 +90,7 @@ def run_step_1():
         st.session_state["GTFS_OBJ"] = None
     if "GRAPH_OBJ" not in st.session_state.keys():
         st.session_state["GRAPH_OBJ"] = None
-    st.session_state["GTFS_OBJ"] = page_1()
+    page_1()
     print("step 1. GTFS_OBJ", st.session_state["GTFS_OBJ"])
 
 

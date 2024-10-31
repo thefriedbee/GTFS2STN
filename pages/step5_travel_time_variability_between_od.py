@@ -21,10 +21,14 @@ if "b5_1_clicked" not in st.session_state.keys():
 if "stop_id" not in st.session_state.keys():
     st.session_state["stop_id"] = ""
 
-if "orig_coords" not in st.session_state.keys():
-    st.session_state["orig_coords"] = ""
-if "dest_coords" not in st.session_state.keys():
-    st.session_state["dest_coords"] = ""
+if "b5_form_info" not in st.session_state.keys():
+    st.session_state["b5_form_info"] = {
+        "orig_coords": "",
+        "dest_coords": "",
+        "depart_time_range": (7, 10),
+        "walk_dist": 0.5,
+        "run_mode": "1 source, 1 destination"
+    }
 
 
 def page5_init():
@@ -41,11 +45,87 @@ def page5_init():
         st.session_state["stops"] = None
 
 
-def page_5() -> tuple[gpd.GeoDataFrame, str, str, tuple[int, int], float, str]:
+@st.fragment()
+def page_5_form(st_data):
+    # get last active drawing
+    def get_last_active_drawing(st_data):
+        ret_coords = st_data["last_object_clicked"]
+        return ret_coords
+
+    b5_form = st.session_state.b5_form_info
+    print('st.session_state["b5_form_info"]', b5_form)
+    print('st.session_state["orig_coords"]', b5_form["orig_coords"])
+    print('st.session_state["dest_coords"]', b5_form["dest_coords"])
+
+    is_origin_fixed = st.checkbox("freeze origin")
+    placeholder_orig = st.empty()
+    stop_orig_coords = placeholder_orig.text_input("enter origin coordinate (can click on map)")
+    if is_origin_fixed and b5_form["orig_coords"] is not None:
+        stop_orig_coords = placeholder_orig.text_input(
+            "enter origin coordinate (can click on map)",
+            value=b5_form["orig_coords"],
+        )
+    elif is_origin_fixed:
+        pass
+    elif st_data is not None:
+        stop_orig_coords = placeholder_orig.text_input(
+            "enter origin coordinate (can click on map)",
+            value=get_last_active_drawing(st_data),
+        )
+        b5_form["orig_coords"] = stop_orig_coords
+
+    is_dest_fixed = st.checkbox("freeze destination")
+    placeholder_dest = st.empty()
+    stop_dest_coords = placeholder_dest.text_input("enter destination coordinate (can click on map)")
+    if is_dest_fixed and b5_form["dest_coords"] is not None:
+        stop_dest_coords = placeholder_dest.text_input(
+            "enter destination coordinate (can click on map1)",
+            value=b5_form["dest_coords"],
+        )
+    elif is_dest_fixed:
+        pass
+    elif st_data is not None:
+        stop_dest_coords = placeholder_dest.text_input(
+            "enter destination coordinate (can click on map2)",
+            value=get_last_active_drawing(st_data),
+        )
+        b5_form["dest_coords"] = stop_dest_coords
+
+    # time scope
+    depart_time_range = st.slider(
+        "Select departure time range during the day (in hours)",
+        0, 23, (7, 10)
+    )
+    b5_form["depart_time_range"] = depart_time_range
+
+    # TODO: select walking radius
+    walk_dist = st.slider(
+        "walking distance (in miles)",
+        0.1, 3.0, .5, 0.2,
+    )
+    b5_form["walk_dist"] = walk_dist
+
+    # select multiple origin or multiple destinations
+    run_mode = st.radio(
+        "Available mode for running the Dijkstra's algorithm:",
+        [
+            "1 source, 1 destination",
+            "1 source, 1+ destination",
+            "1+ source, 1 destination",
+            "1+ source, 1+ destination"
+        ]
+    )
+    b5_form["run_mode"] = run_mode
+
+    # submit_button = st.form_submit_button("Start Analysis & plot results")
+    # st.session_state["b5_1_clicked"] = submit_button
+
+
+def page_5() -> None:
     stops = st.session_state["stops"]
     # stops need to be filtered for the schedule...
     st.title("Step 5. Query travel time variation of the day")
-    col1, col2 = st.columns([1, 3])
+    col1, col2 = st.columns([1, 2])
 
     with col2:
         st.write("map reference of stops")
@@ -57,81 +137,19 @@ def page_5() -> tuple[gpd.GeoDataFrame, str, str, tuple[int, int], float, str]:
                 show_popup=True,
             )
     with col1:
-        # get last active drawing
-        def get_last_active_drawing(st_data):
-            ret_coords = st_data["last_object_clicked"]
-            return ret_coords
-
-        print('st.session_state["orig_coords"]', st.session_state["orig_coords"])
-        print('st.session_state["dest_coords"]', st.session_state["dest_coords"])
-
-        is_origin_fixed = st.checkbox("freeze origin")
-        placeholder_orig = st.empty()
-        stop_orig_coords = placeholder_orig.text_input("enter origin coordinate (can click on map)")
-        if is_origin_fixed and st.session_state["orig_coords"] is not None:
-            stop_orig_coords = placeholder_orig.text_input(
-                "enter origin coordinate (can click on map)",
-                value=st.session_state["orig_coords"],
-            )
-        elif is_origin_fixed:
-            pass
-        elif st_data is not None:
-            stop_orig_coords = placeholder_orig.text_input(
-                "enter origin coordinate (can click on map)",
-                value=get_last_active_drawing(st_data),
-            )
-            st.session_state["orig_coords"] = stop_orig_coords
-
-        is_dest_fixed = st.checkbox("freeze destination")
-        placeholder_dest = st.empty()
-        stop_dest_coords = placeholder_dest.text_input("enter destination coordinate (can click on map)")
-        if is_dest_fixed and st.session_state["dest_coords"] is not None:
-            stop_dest_coords = placeholder_dest.text_input(
-                "enter destination coordinate (can click on map1)",
-                value=st.session_state["dest_coords"],
-            )
-        elif is_dest_fixed:
-            pass
-        elif st_data is not None:
-            stop_dest_coords = placeholder_dest.text_input(
-                "enter destination coordinate (can click on map2)",
-                value=get_last_active_drawing(st_data),
-            )
-            st.session_state["dest_coords"] = stop_dest_coords
-
-        # time scope
-        depart_time_range = st.slider(
-            "Select departure time range during the day (in hours)",
-            0, 23, (7, 10)
-        )
-
-        # TODO: select walking radius
-        walk_dist = st.slider(
-            "walking distance (in miles)",
-            0.1, 3.0, .5, 0.2,
-        )
-
-        # select multiple origin or multiple destinations
-        run_mode = st.radio(
-            "Available mode for running the Dijkstra's algorithm:",
-            [
-                "1 source, 1 destination",
-                "1 source, 1+ destination",
-                "1+ source, 1 destination",
-                "1+ source, 1+ destination"
-            ]
-        )
-
-    return stops, stop_orig_coords, stop_dest_coords, depart_time_range, walk_dist, run_mode
+        page_5_form(st_data)
+    
+    # return stops, stop_orig_coords, stop_dest_coords, depart_time_range, walk_dist, run_mode
 
 
-def page_5_find_stops_given_coords(
-        stops: gpd.GeoDataFrame,
-        stop_orig_coords: str,
-        stop_dest_coords: str,
-        walk_dist: float,
-        run_code: int,
-):
+def page_5_find_stops_given_coords():
+    # get form info
+    stops: gpd.GeoDataFrame = st.session_state["stops"]
+    stop_orig_coords: str = st.session_state.b5_form_info["orig_coords"]
+    stop_dest_coords: str = st.session_state.b5_form_info["dest_coords"]
+    walk_dist: float = st.session_state.b5_form_info["walk_dist"]
+    run_code: int = st.session_state.b5_form_info["run_mode"]
+
     # parse str returns
     stop_orig_coords = stop_orig_coords.replace("\'", "\"")
     stop_dest_coords = stop_dest_coords.replace("\'", "\"")
@@ -166,14 +184,11 @@ def page_5_find_stops_given_coords(
     return stop_orig_ids, stop_dest_ids
 
 
-def page_5_od_reliability(
-        stops: gpd.GeoDataFrame,
-        stop_orig_coords: str,
-        stop_dest_coords: str,
-        depart_time_range: tuple[int, int],
-        walk_dist: float,
-        run_mode: str,
-):
+def page_5_od_reliability():
+    # load parameters
+    run_mode: str = st.session_state.b5_form_info["run_mode"]
+    depart_time_range: tuple[int, int] = st.session_state.b5_form_info["depart_time_range"]
+
     # decode run mode
     run_code = -1
     if run_mode == "1 source, 1 destination":
@@ -189,17 +204,11 @@ def page_5_od_reliability(
 
     if (
             st.button("Start Analysis & plot results") or
-            st.session_state.b5_1_clicked
+            st.session_state["b5_1_clicked"]
     ):
         st.session_state["b5_1_clicked"] = True
         # decode coordinates to nearest bus stops within walking distance
-        stop_orig_ids, stop_dest_ids = page_5_find_stops_given_coords(
-            stops=stops,
-            stop_orig_coords=stop_orig_coords,
-            stop_dest_coords=stop_dest_coords,
-            walk_dist=walk_dist,
-            run_code=run_code,
-        )
+        stop_orig_ids, stop_dest_ids = page_5_find_stops_given_coords()
         st.text_input("closest transit station near the origin coordinates:", stop_orig_ids)
         st.text_input("closest transit station near the destination coordinates:", stop_dest_ids)
 
@@ -280,11 +289,8 @@ def page_5_od_reliability(
 
 page5_init()
 if GTFS_OBJ is not None and GRAPH_OBJ is not None:
-    stops, stop_orig_coords, stop_dest_coords, depart_time_range, walk_dist, run_mode = page_5()
-    page_5_od_reliability(
-        stops, stop_orig_coords, stop_dest_coords,
-        depart_time_range, walk_dist, run_mode
-    )
+    page_5()
+    page_5_od_reliability()
 
     # m = None
     # if m is not None:

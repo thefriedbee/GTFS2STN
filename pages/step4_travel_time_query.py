@@ -16,11 +16,7 @@ import script.graph_pipeline as graph_pipeline
 from script.GTFSGraph import GTFSGraph
 from script.gtfs_controller import GTFSController
 
-st.set_page_config(
-    layout="wide",
-    page_title="GTFS2STN",
-    page_icon="🚌"
-)
+st.set_page_config(layout="wide", page_title="GTFS2STN", page_icon="🚌")
 
 if "b4_1_clicked" not in st.session_state.keys():
     st.session_state["b4_1_clicked"] = False
@@ -47,17 +43,21 @@ def page_4() -> tuple[gpd.GeoDataFrame, str, float, int]:
     print("step 4 stops length:", len(stops))
     # stops need to be filtered for the schedule...
     st.title("Step 4. Query shortest travel scheme from one origin at different time of the day")
+
     col1, col2 = st.columns([1, 3])
     with col1:
-        stop_id = st.text_input("choose stop id")
-        depart_hr = st.slider(
-            "Departure time (hour of a day)",
-            0, 23, 8, 1
-        )
-        max_tt = st.slider(
-            "Select maximum travel time (cutoff of the Dijkstra's algorithm)",
-            0, 180, 120, 15
-        )
+        with st.form(key='stop_id_analysis'):
+            stop_id = st.text_input("choose stop id")
+            depart_hr = st.slider(
+                "Departure time (hour of a day)",
+                0, 23, 8, 1
+            )
+            max_tt = st.slider(
+                "Select maximum travel time (cutoff of the Dijkstra's algorithm)",
+                0, 180, 120, 15
+            )
+            submit_button = st.form_submit_button("Start analysis & plot results!")
+            st.session_state["b4_1_clicked"] = submit_button
     with col2:
         # plot map for reference...
         st.write("map reference of stops")
@@ -76,13 +76,9 @@ def page_4_execute(
 
     st.title("Generate Isochrone plot (accessibility from a single source)")
     # start building network and query the shortest path
-    if (st.button("Start analysis & plot results") or
-            st.session_state.b4_1_clicked and
-            stop_id != ""
-    ):  # if stop_id != "", no inputs, just enter the page
-        st.session_state["b4_1_clicked"] = True
+    # if stop_id != "", no inputs, just enter the page
+    if (st.session_state.b4_1_clicked and stop_id != ""):
         st.session_state["stop_id"] = stop_id
-
         for key in GRAPH_OBJ.nodes_time_map:
             if not isinstance(key, str):
                 stop_id = int(stop_id)
@@ -117,12 +113,6 @@ def page_4_execute(
 
         my_bar.progress(100)
     return m
-
-
-def page_4_od_reliability():
-    st.title("Generate travel variability between od over time")
-    pass
-
 
 page4_init()
 

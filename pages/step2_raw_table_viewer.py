@@ -18,6 +18,7 @@ def page_2_init():
     print("step2 GTFS_OBJ:", GTFS_OBJ)
 
 
+@st.fragment()
 def page_2_2():
     st.title("Step 2. Table Viewer")
     # ["agency.txt", "stops.txt", "calendar.txt", "calendar_dates.txt",

@@ -44,37 +44,40 @@ def init_page3():
 
 def page_3():
     st.title("Step 3. Build transit network")
-    col1, col2 = st.columns([1, 4])
-    with col1:
-        # part (2): choose a specific date for analysis
-        the_date = st.date_input("the date to evaluate", value=None)
 
-        # (2) choose walk buffer (maximal walking distance)
-        bw_mile = st.slider(
-            "Select maximum walking distance between stops (mile)",
-            0.0, 0.5, 0.25, 0.05
-        )
-        # (3) choose walk speed
-        walk_speed = st.slider(
-            "Select walking speed (mph)",
-            1, 3, 2, 1
-        )
+    with st.form(key='network_config_form'):
+        col1, col2 = st.columns([1, 4])
+        with col1:
+            # part (2): choose a specific date for analysis
+            the_date = st.date_input("the date to evaluate", value=None)
 
-        # update configuration information:
-        network_config_info["date"] = the_date
-        network_config_info["bw_mile"] = bw_mile
-        network_config_info["walk_speed"] = walk_speed
-    with col2:  # show service id table to select
-        st.write("'Calendar.txt' for reference")
-        with st.spinner('Loading table calendar.txt...'):
-            show_static_table_simple(GTFS_OBJ, 'calendar.txt')
+            # (2) choose walk buffer (maximal walking distance)
+            bw_mile = st.slider(
+                "Select maximum walking distance between stops (mile)",
+                0.0, 0.5, 0.25, 0.05
+            )
+            # (3) choose walk speed
+            walk_speed = st.slider(
+                "Select walking speed (mph)",
+                1, 3, 2, 1
+            )
+
+            # update configuration information:
+            network_config_info["date"] = the_date
+            network_config_info["bw_mile"] = bw_mile
+            network_config_info["walk_speed"] = walk_speed
+        with col2:  # show service id table to select
+            st.write("'Calendar.txt' for reference")
+            with st.spinner('Loading table calendar.txt...'):
+                show_static_table_simple(GTFS_OBJ, 'calendar.txt')
+        submit_button = st.form_submit_button("Generate Transit Network over space and time!")
+        return submit_button
 
 
-def page_3_execute():
+def page_3_execute(submit_button):
     # start building the spatio-temporal network!
     # (5) a button to generate spatio-temporal network (nested buttons)
-    if (st.button("Generate Transit Network over space and time!") or
-            st.session_state["b3_1_clicked"]):
+    if (submit_button or st.session_state["b3_1_clicked"]):
         # unload parameters
         the_date = network_config_info["date"]
         if the_date is None:
@@ -112,5 +115,5 @@ def page_3_execute():
 init_page3()
 # generate all stuff by running this function
 if st.session_state["GTFS_OBJ"] is not None:
-    page_3()  # draw basic layouts
-    page_3_execute()
+    submit_button = page_3()  # draw basic layouts
+    page_3_execute(submit_button)
