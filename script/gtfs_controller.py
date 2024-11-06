@@ -32,10 +32,13 @@ class GTFSController:
 
     def load_txt_files(self):
         # load txt files into memory
-        for file in glob.glob(f"{self.root_dir}/*.txt"):
+        print("self.root_dir", self.root_dir)
+        fns = glob.glob(f"{self.root_dir}/*.txt")
+        print("fns", fns)
+        for file in fns:
             fn = file.split('/')[-1]
             self.dfs[fn] = pd.read_csv(file)
-
+        
         # change stops ids to string
         stops = self.dfs["stops.txt"]
         stops["stop_id"] = stops["stop_id"].astype(str)
