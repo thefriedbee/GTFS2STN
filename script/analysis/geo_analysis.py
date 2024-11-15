@@ -112,29 +112,31 @@ def find_nei_stops_given_coords(
     )
     stops_idx = []
     dists = []
+    acc_times = []
     for loc in locs:
         indices, distances = bt.query_radius(
             np.deg2rad(np.c_[loc[0], loc[1]]),
             r=bw_mile / 3959.8,  # mile
             return_distance=True
         )
-        indices = indices[0]
+        index = indices[0]
         distances = distances[0]
+
         stops_idx += indices.flatten().tolist()
         dists += (distances * 3959.8).flatten().tolist()
-
-    # stops_idx = np.concatenate(stops_idx).tolist()
-    # dists = np.concatenate(dists).tolist()
-    print("stops_idx:", stops_idx)
-    print("dists:", dists)
-
+        # walking speed is 2.5 mph
+        acc_times += (np.array(dists) / 2.5 * 60).flatten().tolist()
+    
     # merge and only keep the nearest points
-    if return_all_neighbors is False:
-        stops_idx = [stops.iloc[stops_idx[0]]["stop_id"]]
-        dists = [dists[0]]
+    if return_all_neighbors:
+        stops_ids = [stops.iloc[idx]["stop_id"] for idx in stops_idx]
     else:
-        stops_idx = [stops.iloc[idx]["stop_id"] for idx in stops_idx]
+        stops_ids = [stops.iloc[stops_idx[0]]["stop_id"]]
+        acc_times = [acc_times[0]]
 
-    return stops_idx, dists
+    stops_ids = stops_ids[0].values.tolist()
+    # print("stops_ids:", stops_ids)
+    # print("acc_times:", acc_times)
+    return stops_ids, acc_times
 
 

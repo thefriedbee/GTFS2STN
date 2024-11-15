@@ -9,6 +9,15 @@ from script.GTFSGraph import GTFSGraph
 import script.analysis.geo_analysis as gpd_ut
 
 
+def get_stop_information(stops: pd.DataFrame) -> list[str]:
+    exist_cols = stops.columns.tolist()
+    stop_info = ["stop_name", "stop_code", "stop_id"]
+    missed_cols = [col for col in stop_info if col not in exist_cols]
+    for ms in missed_cols:
+        stops[ms] = "N/A"
+    return stops
+
+
 def display_map_background(
         stops: pd.DataFrame | gpd.GeoDataFrame
 ) -> folium.Map:
@@ -27,14 +36,20 @@ def display_gtfs_stops(
         m: folium.Map,
         show_popup=True,
 ) -> folium.Map:
+    stops = get_stop_information(stops)
     # folium bus stops...
     for coords in stops[["stop_lat", "stop_lon", "stop_name", "stop_code", "stop_id"]].values.tolist():
         # iframe = folium.IFrame(f"stop name: {coords[2]} <br> stop code: {coords[3]}")
         # tooltip = folium.Popup(iframe, min_width=50, max_width=300)
         if show_popup:
+            popup_txt = f"<strong>Stop ID:</strong> {coords[4]}<br>"
+            popup_txt += f"<strong>Stop Name:</strong> {coords[2]}<br>"
+            popup_txt += f"<strong>Stop Code:</strong> {coords[3]}<br>"
+            popup_txt += f"<strong>Latitude:</strong> {coords[0]}<br>"
+            popup_txt += f"<strong>Longitude:</strong> {coords[1]}"
             folium.CircleMarker(
                 location=coords[:2],
-                popup=folium.Popup(f"stop id: {coords[4]}", parse_html=False),
+                popup=folium.Popup(popup_txt, parse_html=False, max_width=300),
                 tooltip=f"stop name: {coords[2]} <br> stop code: {coords[3]} <br> stop id: {coords[4]}",
                 radius=2,
                 weight=5,

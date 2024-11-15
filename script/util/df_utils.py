@@ -81,7 +81,7 @@ def display_stops_one_source(
     print(stops_acc.head())
     print("stops_acc's shape:", stops_acc.shape)
 
-    stops = stops[["stop_id", "stop_lat", "stop_lon", "stop_name", "stop_code", "node_id"]]
+    stops = stops[["stop_id", "stop_lat", "stop_lon", "stop_name", "node_id"]]
     stops = stops.merge(stops_acc, on="node_id", how="inner")
     print("stops shape after merge:", stops.shape)
 

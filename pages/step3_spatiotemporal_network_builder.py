@@ -8,7 +8,8 @@ import script.graph_pipeline as graph_pipeline
 from script.GTFSGraph import GTFSGraph
 from script.gtfs_controller import (
     build_network,
-    filter_service_id_by_date
+    filter_service_id_by_date,
+    filter_service_id_by_date_v2,
 )
 
 from script.util.table_viewer import show_static_table, show_static_table_simple
@@ -69,7 +70,11 @@ def page_3():
         with col2:  # show service id table to select
             st.write("'Calendar.txt' for reference")
             with st.spinner('Loading table calendar.txt...'):
-                show_static_table_simple(GTFS_OBJ, 'calendar.txt')
+                try:
+                    show_static_table_simple(GTFS_OBJ, 'calendar.txt')
+                except:
+                    show_static_table(GTFS_OBJ, 'calendar_dates.txt')
+                    st.warning("'calendar.txt' not found! Use 'calendar_dates.txt' instead.")
         submit_button = st.form_submit_button("Generate Transit Network over space and time!")
         return submit_button
 
@@ -84,11 +89,18 @@ def page_3_execute(submit_button):
             st.error("should fill a date for analysis...")
 
         # filter the data set...
-        services = GTFS_OBJ.dfs["calendar.txt"].copy()
-        services = filter_service_id_by_date(
-            services=services,
-            the_date=the_date
-        )
+        try:
+            services = GTFS_OBJ.dfs["calendar.txt"].copy()
+            services = filter_service_id_by_date(
+                services=services,
+                the_date=the_date
+            )
+        except:
+            services = GTFS_OBJ.dfs["calendar_dates.txt"].copy()
+            services = filter_service_id_by_date_v2(
+                services=services,
+                the_date=the_date
+            )
         # selected service ids
         sel_sids = services["service_id"].tolist()
         print(f"selected service ids {sel_sids}")

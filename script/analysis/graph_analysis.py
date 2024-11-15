@@ -10,6 +10,7 @@ import pandas as pd
 from sklearn.neighbors import BallTree
 
 import script.gtfs_controller as gtfs
+# from shapely.geometry import Point
 
 
 # when building network, each stop needs to know its neighboring stops

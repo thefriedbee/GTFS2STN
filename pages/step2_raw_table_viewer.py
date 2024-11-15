@@ -30,7 +30,7 @@ def page_2_2():
         try:
             table_ut.show_static_table(GTFS_OBJ, 'agency.txt')
         except:
-            st.subheader("'agency.txt' are not found!!")
+            st.subheader("'agency.txt' not found!!")
 
     with all_tabs[1]:  # "stops.txt"
         col1, col2 = st.columns(2)
@@ -42,19 +42,22 @@ def page_2_2():
                 map_ut.show_stops_map(GTFS_OBJ)
 
     with all_tabs[2]:  # calendar
-        table_ut.show_static_table(GTFS_OBJ, 'calendar.txt')
+        try:
+            table_ut.show_static_table(GTFS_OBJ, 'calendar.txt')
+        except:
+            st.subheader("'calendar.txt' not found!")
 
     with all_tabs[3]:  # calendar dates
         try:
             table_ut.show_static_table(GTFS_OBJ, 'calendar_dates.txt')
         except:
-            st.subheader("'calendar_dates.txt' are not found!")
+            st.subheader("'calendar_dates.txt' not found!")
 
     with all_tabs[4]:  # routes
         try:
             table_ut.show_static_table(GTFS_OBJ, 'routes.txt')
         except:
-            st.subheader("'routes.txt' are not found!")
+            st.subheader("'routes.txt' not found!")
 
     with all_tabs[5]:  # shapes
         # try:
@@ -70,13 +73,13 @@ def page_2_2():
         try:
             table_ut.show_static_table(GTFS_OBJ, 'stop_times.txt')
         except:
-            st.subheader("'stop_times.txt' are not found!")
+            st.subheader("'stop_times.txt' not found!")
 
     with all_tabs[7]:  # trips
         try:
             table_ut.show_static_table(GTFS_OBJ, 'trips.txt')
         except:
-            st.subheader("'trip.txt' are not found!")
+            st.subheader("'trip.txt' not found!")
 
 
 page_2_init()

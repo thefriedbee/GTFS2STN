@@ -138,8 +138,6 @@ def page_5() -> None:
             )
     with col1:
         page_5_form(st_data)
-    
-    # return stops, stop_orig_coords, stop_dest_coords, depart_time_range, walk_dist, run_mode
 
 
 def page_5_find_stops_given_coords():
@@ -165,7 +163,7 @@ def page_5_find_stops_given_coords():
     return_all_origs = True
     if run_code != 2:
         return_all_origs = False
-    stop_orig_ids, stop_orig_dists = geo_analysis.find_nei_stops_given_coords(
+    stop_orig_ids, __ = geo_analysis.find_nei_stops_given_coords(
         stops,
         stop_orig_coords,
         bw_mile=walk_dist,
@@ -175,7 +173,7 @@ def page_5_find_stops_given_coords():
     return_all_dests = True
     if run_code != 1:
         return_all_dests = False
-    stop_dest_ids, stop_dest_dists = geo_analysis.find_nei_stops_given_coords(
+    stop_dest_ids, __ = geo_analysis.find_nei_stops_given_coords(
         stops,
         stop_dest_coords,
         bw_mile=walk_dist,
@@ -237,9 +235,9 @@ def page_5_od_reliability():
                     depart_min=depart_min,
                 )
             elif run_code == 3:
-                all_paths = GRAPH_OBJ.query_od_stops_time_multiple_ods(
+                all_paths, __ = GRAPH_OBJ.query_od_stops_time_multiple_ods(
                     stop_orig_ids=stop_orig_ids,
-                    stop_dest_id=stop_dest_ids,
+                    stop_dest_ids=stop_dest_ids,
                     depart_min=depart_min,
                 )
             else:

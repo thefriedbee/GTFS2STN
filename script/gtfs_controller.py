@@ -46,15 +46,18 @@ class GTFSController:
         stop_times = self.dfs["stop_times.txt"]
         stop_times["stop_id"] = stop_times["stop_id"].astype(str)
         # set calendar type
-        cal = self.dfs["calendar.txt"]
-        cal["start_date"] = cal["start_date"].astype(str)
-        cal["end_date"] = cal["end_date"].astype(str)
+        if "calendar.txt" in self.dfs.keys():
+            cal = self.dfs["calendar.txt"]
+            cal["start_date"] = cal["start_date"].astype(str)
+            cal["end_date"] = cal["end_date"].astype(str)
 
     def process_shapes(self):
         df_shapes = self.dfs["shapes.txt"]
 
         # process list of coordinates to a LineString format
         def compact_shape(df):
+            if 'shape_dist_traveled' not in df.columns:
+                df['shape_dist_traveled'] = 0
             dst = df['shape_dist_traveled'].tolist()
             pts = [Point(loc) for loc in zip(df.shape_pt_lon.tolist(), 
                                              df.shape_pt_lat.tolist())]
@@ -93,14 +96,14 @@ class GTFSController:
     def display_map_tile(self, show_popup=True) -> folium.Map:
         # the most basic map to start with
         # let's use folium
-        stops = self.dfs['stops.txt'][["stop_lat", "stop_lon", "stop_name", "stop_code", "stop_id"]]
+        stops = self.dfs['stops.txt']
         # add stops to map
         m = folium_plots.display_map_background(stops)
         m = folium_plots.display_gtfs_stops(stops, m, show_popup=show_popup)
         return m
 
     def display_stops_map(self, show_popup=True) -> folium.Map:
-        stops = self.dfs['stops.txt'][["stop_lat", "stop_lon", "stop_name", "stop_code", "stop_id"]]
+        stops = self.dfs['stops.txt']
         # add stops to map
         m = folium_plots.display_map_background(stops)
         m = folium_plots.display_gtfs_stops(stops, m, show_popup=show_popup)
@@ -108,10 +111,8 @@ class GTFSController:
 
     def display_routes_map(self, m=None, width=400, height=400):
         # load routes and shapes
-        # routes = self.dfs['routes.txt'][["route_id", "route_short_name", "route_long_name",
-        #                                  "route_type", "route_color"]]
         lines = self.shapes_gdf['geometry']
-        stops = self.dfs['stops.txt'][["stop_lat", "stop_lon", "stop_name", "stop_code", "stop_id"]]
+        stops = self.dfs['stops.txt']
         if m is None:
             m = folium_plots.display_map_background(stops=stops)
         m = folium_plots.display_gtfs_lines(lines, m)
@@ -247,4 +248,18 @@ def filter_service_id_by_date(
         st.error("no feasible services for that date found.")
 
     return services.loc[filt, :]
+
+
+def filter_service_id_by_date_v2(
+    services: pd.DataFrame,
+    the_date: datetime.datetime,
+) -> pd.DataFrame:
+    the_date = pd.to_datetime(the_date).date()
+    services['date'] = pd.to_datetime(services['date'], format="%Y%m%d")
+    services['date'] = services['date'].dt.date
+    
+    filt = services['date'] == the_date
+    # print("filt", filt.sum())
+    services = services.loc[filt, :]
+    return services
 

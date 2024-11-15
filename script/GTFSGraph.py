@@ -404,14 +404,23 @@ class GTFSGraph:
             stop_orig_ids: list[str],
             stop_dest_ids: list[str],
             depart_min: int,
+            acc_orig_times: list[float] | None = None,
+            acc_dest_times: list[float] | None = None
     ):
         paths = []
-        print("paths in dest func: ", stop_dest_ids)
-        for stop_dest_id in stop_dest_ids:
-            for stop_orig_id in stop_orig_ids:
+        for stop_orig_id in stop_orig_ids:
+            for stop_dest_id in stop_dest_ids:
                 paths.append(self.query_od_stops_time(
                     stop_orig_id=stop_orig_id,
                     stop_dest_id=stop_dest_id,
                     depart_min=depart_min,
                 ))
-        return paths
+        if acc_orig_times is None or acc_dest_times is None:
+            return paths, None
+        
+        # get the acc_times
+        acc_times = []
+        for i, stop_orig_id in enumerate(stop_orig_ids):
+            for j, stop_dest_id in enumerate(stop_dest_ids):
+                acc_times.append(acc_orig_times[i] + acc_dest_times[j])
+        return paths, acc_times
