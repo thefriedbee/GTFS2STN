@@ -5,7 +5,15 @@ network (STN) for shortest path analysis.
 If you use the tool, consider cite the following *paper*:
 - [*GTFS2STN: Analyzing GTFS Transit Data By Generating Spatiotemporal Transit Network*](https://arxiv.org/abs/2405.02760)
 
-## Quick explore online (please visit: https://gtfs2stn.streamlit.app/): 
+## Quick explore online (please visit: https://gtfs2stn.streamlit.app/)
+
+The application may take some time to booting (restricted by free-tier streamlit cloud service).
+
+To run the code locally, run by:
+```
+streamlit run Introduction.py
+```
+
 
 Youtube video demo link: 
 
