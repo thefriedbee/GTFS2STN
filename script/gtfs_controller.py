@@ -214,15 +214,15 @@ def filter_service_id_by_date(
         5: "saturday",
         6: "sunday"
     }
-    the_date = pd.to_datetime(the_date)
+    the_date = pd.to_datetime(the_date).date()
     the_weekday = WEEKDAYS[the_date.weekday()]
 
     services["start_date"] = pd.to_datetime(
         services["start_date"], format="%Y%m%d"
-    )
+    ).dt.date
     services["end_date"] = pd.to_datetime(
         services["end_date"], format="%Y%m%d"
-    )
+    ).dt.date
 
     filts = []
     # the queried time range is totally covered by the time range...
@@ -237,12 +237,7 @@ def filter_service_id_by_date(
 
     concat_and = lambda x, y: x & y
     filt = reduce(concat_and, filts)
-
     print("the date for analysis:", the_date)
-    print("filts")
-    print(filts[0].sum())
-    print(filts[1].sum())
-    print(filt.sum())
 
     if filt.sum() == 0:
         st.error("no feasible services for that date found.")
@@ -253,13 +248,17 @@ def filter_service_id_by_date(
 def filter_service_id_by_date_v2(
     services: pd.DataFrame,
     the_date: datetime.datetime,
-) -> pd.DataFrame:
+) -> tuple[list[int], list[int]]:
+    # part 1: get services from the "calendar_dates.txt" file
     the_date = pd.to_datetime(the_date).date()
     services['date'] = pd.to_datetime(services['date'], format="%Y%m%d")
     services['date'] = services['date'].dt.date
     
-    filt = services['date'] == the_date
-    # print("filt", filt.sum())
-    services = services.loc[filt, :]
-    return services
+    filt = (services['date'] == the_date) & (services['exception_type'] == 1)
+    sids_included = services.loc[filt, "service_id"].tolist()
+
+    # part 2: get services from the "calendar.txt" file
+    filt = (services['date'] == the_date) & (services['exception_type'] == 2)
+    sids_excluded = services.loc[filt, "service_id"].tolist()
+    return sids_included, sids_excluded
 
