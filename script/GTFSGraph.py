@@ -390,19 +390,27 @@ class GTFSGraph:
 
     def query_od_stops_time(
             self,
-            stop_orig_id: str,
-            stop_dest_id: str,
+            stop_orig_ids: list[str],
+            stop_dest_ids: list[str],
             depart_min: int,
             cutoff: float,  # e.g., 180 for 3 hours
     ) -> dict:
-        orig_node_id, node_id_dest = self._create_linkage_to_graph(
-            stop_orig_id=stop_orig_id,
-            stop_dest_id=stop_dest_id,
-            depart_min=depart_min
-        )
+        # add final origin & destination links
+        orig_node_ids = []
+        node_id_dests = []
+        for orig_id in stop_orig_ids:
+            for dest_id in stop_dest_ids:
+                orig_node_id, node_id_dest = self._create_linkage_to_graph(
+                    stop_orig_id=orig_id,
+                    stop_dest_id=dest_id,
+                    depart_min=depart_min
+                )
+                orig_node_ids.append(orig_node_id)
+                node_id_dests.append(node_id_dest)
+
         visitor = self._dijkstra_search_worker(
-            orig_node_ids=[orig_node_id],
-            node_id_dests=[node_id_dest],
+            orig_node_ids=orig_node_ids,
+            node_id_dests=node_id_dests,
             cutoff=cutoff
         )
         res_paths = visitor.get_final_path()
@@ -447,15 +455,13 @@ class GTFSGraph:
             depart_min: int,
             cutoff: float,
     ):
-        paths = []
-        for stop_orig_id in stop_orig_ids:
-            paths.append(self.query_od_stops_time(
-                stop_orig_id=stop_orig_id,
-                stop_dest_id=stop_dest_id,
-                depart_min=depart_min,
-                cutoff=cutoff
-            ))
-        return paths
+        paths = self.query_od_stops_time(
+            stop_orig_ids=stop_orig_ids,
+            stop_dest_ids=[stop_dest_id],
+            depart_min=depart_min,
+            cutoff=cutoff
+        )
+        return [paths]
 
     def query_od_stops_time_multiple_dest(
             self,
@@ -464,16 +470,13 @@ class GTFSGraph:
             depart_min: int,
             cutoff: float,
     ):
-        paths = []
-        print("paths in dest func: ", stop_dest_ids)
-        for stop_dest_id in stop_dest_ids:
-            paths.append(self.query_od_stops_time(
-                stop_orig_id=stop_orig_id,
-                stop_dest_id=stop_dest_id,
-                depart_min=depart_min,
-                cutoff=cutoff
-            ))
-        return paths
+        paths = self.query_od_stops_time(
+            stop_orig_ids=[stop_orig_id],
+            stop_dest_ids=stop_dest_ids,
+            depart_min=depart_min,
+            cutoff=cutoff
+        )
+        return [paths]
 
     def query_od_stops_time_multiple_ods(
             self,
@@ -484,15 +487,14 @@ class GTFSGraph:
             acc_orig_times: list[float] | None = None,
             acc_dest_times: list[float] | None = None
     ):
-        paths = []
-        for stop_orig_id in stop_orig_ids:
-            for stop_dest_id in stop_dest_ids:
-                paths.append(self.query_od_stops_time(
-                    stop_orig_id=stop_orig_id,
-                    stop_dest_id=stop_dest_id,
-                    depart_min=depart_min,
-                    cutoff=cutoff
-                ))
+        paths = self.query_od_stops_time(
+            stop_orig_ids=stop_orig_ids,
+            stop_dest_ids=stop_dest_ids,
+            depart_min=depart_min,
+            cutoff=cutoff
+        )
+        paths = [paths]
+
         if acc_orig_times is None or acc_dest_times is None:
             return paths, None
         
