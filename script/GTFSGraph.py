@@ -68,10 +68,10 @@ class DijkstraCustomVisitor(DijkstraVisitor):
     # no need to search if time exceeds the cutoff...
     # The shortest path API (e.g., rx.dijkstra_shortest_paths) is not flexible enough
     # (e.g., no cutoff)
-    def __init__(self, cutoff: float, target_v: int):
+    def __init__(self, cutoff: float, target_vs: list[int] | None):
         self.cutoff = cutoff
         self.source_vs: list[int] | None = None
-        self.target_v = target_v
+        self.target_vs: list[int] | None = target_vs
         self.predecessors = {}
         self.final_cost = None
     
@@ -82,7 +82,7 @@ class DijkstraCustomVisitor(DijkstraVisitor):
         if score > self.cutoff:
             self.final_cost = score
             raise StopSearch
-        if v == self.target_v:
+        if v in self.target_vs:
             self.final_cost = score
             raise StopSearch
         if v not in self.predecessors:
@@ -92,30 +92,28 @@ class DijkstraCustomVisitor(DijkstraVisitor):
         u, v, w = edge
         self.predecessors[v] = u
 
-    def get_final_path(self, target_v: int|None = None):
+    def get_final_path(self):
         # corner case: cannot reach within the cutoff time...
         if self.final_cost > self.cutoff:
             print(f"warning: no path found within the cutoff time {self.final_cost:.2f}>{self.cutoff:.2f} minutes...")
-            # raise error
             # raise ValueError("no path found within the cutoff time...")
             return []
-        if target_v is None:
-            target_v = self.target_v
         
         path = []
-        # visited = set()  # track visited nodes
-        while target_v is not None:
-            # if target_v in visited:
-            #     print("loop detected")
-            #     print("target_v:", target_v)
-            #     print("  predecessors:", self.predecessors[target_v])
-            #     print("  path:", path)
-            #     break
-            # visited.add(target_v)
-            path.append(target_v)
-            if target_v in self.source_vs:
+        # find one target node to start backtracking...
+        visited_node_ids = self.predecessors.keys()
+        current_v = None
+        for target_v in self.target_vs:
+            if target_v in visited_node_ids:
+                current_v = target_v
                 break
-            target_v = self.predecessors[target_v]
+        if current_v is None:
+            print("warning: no target node found to start backtracking...")
+            return []
+
+        while current_v is not None:
+            path.append(current_v)
+            current_v = self.predecessors[current_v]
         
         path.reverse()
         return path
@@ -230,12 +228,17 @@ class GTFSGraph:
                     )
                 )
 
-    def _dijkstra_search_worker(self, orig_node_id, node_id_dest, cutoff):
-        visitor = DijkstraCustomVisitor(cutoff=cutoff, target_v=node_id_dest)
-        visitor.set_source_vs([orig_node_id])
+    def _dijkstra_search_worker(
+            self,
+            orig_node_ids: list[int],
+            node_id_dests: list[int],
+            cutoff: float
+    ):
+        visitor = DijkstraCustomVisitor(cutoff=cutoff, target_vs=node_id_dests)
+        visitor.set_source_vs(orig_node_ids)
         rx.digraph_dijkstra_search(
             self.G,
-            [orig_node_id],  # source is a list of nodes
+            orig_node_ids,  # source is a list of nodes
             weight_fn=lambda x: x.total_t,
             visitor=visitor
         )
@@ -321,7 +324,7 @@ class GTFSGraph:
             # need to exclude itself (self-loops)
             if stop_id == sid:
                 continue
-            # print("sid:", sid, node_b_id)
+
             journey_t = max(0.1, round(journey_mins[i]))
             if stop_id != sid:
                 self.add_edge(
@@ -342,7 +345,11 @@ class GTFSGraph:
                     )
                 )
 
-        visitor = self._dijkstra_search_worker(the_origin_nid, None, cutoff)
+        visitor = self._dijkstra_search_worker(
+            orig_node_ids=[the_origin_nid],
+            node_id_dests=nodes_b_ids,
+            cutoff=cutoff
+        )
         res_paths = visitor.get_final_path()
         total_time = visitor.final_cost
         return res_paths, total_time
@@ -393,7 +400,11 @@ class GTFSGraph:
             stop_dest_id=stop_dest_id,
             depart_min=depart_min
         )
-        visitor = self._dijkstra_search_worker(orig_node_id, node_id_dest, cutoff)
+        visitor = self._dijkstra_search_worker(
+            orig_node_ids=[orig_node_id],
+            node_id_dests=[node_id_dest],
+            cutoff=cutoff
+        )
         res_paths = visitor.get_final_path()
         return res_paths
 
