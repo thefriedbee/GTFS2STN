@@ -8,6 +8,8 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 import rustworkx as rx
+from rustworkx import dijkstra_search
+from rustworkx.visit import DijkstraVisitor, StopSearch
 from sortedcontainers import SortedSet
 
 
@@ -61,9 +63,71 @@ class GTFSEdge:
         return f"<{self.start_node}-{self.end_node}, ({self.trip_t},{self.wait_t},{self.walk_t}), {self.mode}>"
 
 
+class DijkstraVisitor(DijkstraVisitor):
+    # this is to stop the dijkstra search based on the total travel time
+    # no need to search if time exceeds the cutoff...
+    # The shortest path API (e.g., rx.dijkstra_shortest_paths) is not flexible enough
+    # (e.g., no cutoff)
+    def __init__(self, cutoff: float, target_v: int):
+        self.cutoff = cutoff
+        self.source_vs: list[int] | None = None
+        self.target_v = target_v
+        self.predecessors = {}
+        self.final_cost = None
+    
+    def set_source_vs(self, source_vs: list[int]):
+        self.source_vs = source_vs
+
+    def discover_vertex(self, v: int, score: float):
+        if score > self.cutoff:
+            self.final_cost = score
+            raise StopSearch
+        if v == self.target_v:
+            self.final_cost = score
+            raise StopSearch
+        if v not in self.predecessors:
+            self.predecessors[v] = None
+    
+    def edge_relaxed(self, edge: float):
+        # print(edge)
+        u, v, w = edge
+        self.predecessors[v] = u
+
+    def get_final_path(self, target_v: int|None = None):
+        # corner case: cannot reach within the cutoff time...
+        if self.final_cost > self.cutoff:
+            print(f"warning: no path found within the cutoff time {self.final_cost:.2f}>{self.cutoff:.2f} minutes...")
+            # raise error
+            # raise ValueError("no path found within the cutoff time...")
+            return []
+        if target_v is None:
+            target_v = self.target_v
+        
+        path = []
+        visited = set()  # track visited nodes
+        while target_v is not None:
+            if target_v in visited:
+                print("loop detected")
+                print("target_v:", target_v)
+                print("  predecessors:", self.predecessors[target_v])
+                print("  path:", path)
+                break
+
+            visited.add(target_v)
+            path.append(target_v)
+            if target_v in self.source_vs:
+                break
+            target_v = self.predecessors[target_v]
+        
+        path.reverse()
+        return path
+
+
 class GTFSGraph:
     def __init__(self):
         self.G: rx.PyDiGraph = rx.PyDiGraph()  # spatiotemporal graph
+        # the visitor is not initialized until the query is called...
+        self.visitor = None  # DijkstraVisitor(cutoff=float('inf'), target_v=None)
         # mapping from node string name to its index...
         self.nodes_name_map: dict = {}
         # augmented data structure to gather all nodes for each stop_id
@@ -124,6 +188,9 @@ class GTFSGraph:
             ts = self.nodes_time_map[stop_id]
             for i in range(len(ts) - 1):
                 t1, t2 = ts[i], ts[i + 1]
+                # same stop could be recorded multiple times in the dict mapping...
+                if t1 == t2:
+                    continue
                 node_a_id = self.query_node_or_create(stop_id=stop_id, tod=t1)
                 node_b_id = self.query_node_or_create(stop_id=stop_id, tod=t2)
                 # waiting at the same station, so waiting time equals travel time
@@ -159,9 +226,10 @@ class GTFSGraph:
                 # edge to destinations are not tracked in self.nodes_time_map
                 self.add_edge(
                     node_a=ori_node_id, node_b=dest_node_id,
+                    # make the cost not zero to avoid infinite loop...
                     properties=GTFSEdge(
                         start_node=ori_node_id, end_node=dest_node_id,
-                        trip_t=0, wait_t=0, walk_t=0,
+                        trip_t=0, wait_t=0.1, walk_t=0,
                         mode=EdgeMode.ARRIVED
                     )
                 )
@@ -199,7 +267,7 @@ class GTFSGraph:
                             node_a=origin_node_index, node_b=dest_node_index,
                             properties=GTFSEdge(
                                 start_node=origin_node_index, end_node=dest_node_index,
-                                trip_t=0, wait_t=0, walk_t=walk_ts[j],
+                                trip_t=0, wait_t=0, walk_t=max(0.1, walk_ts[j]),
                                 mode=EdgeMode.WALK
                             )
                         )
@@ -211,7 +279,7 @@ class GTFSGraph:
             stops_df: pd.DataFrame,
             stop_id: str,
             depart_min: float,
-            # cutoff: float,
+            cutoff: float,
             walk_speed: float = 1
     ) -> tuple[dict, dict]:
         # fetch neighbor information
@@ -246,8 +314,11 @@ class GTFSGraph:
         journey_mins = next_mins - depart_mins
         for i, node_b_id in enumerate(nodes_b_ids):
             sid = nei_stop_ids[i]
+            # need to exclude itself (self-loops)
+            if stop_id == sid:
+                continue
             # print("sid:", sid, node_b_id)
-            journey_t = int(journey_mins[i])
+            journey_t = max(0.1, round(journey_mins[i]))
             if stop_id != sid:
                 self.add_edge(
                     node_a=the_origin_nid, node_b=node_b_id,
@@ -267,23 +338,20 @@ class GTFSGraph:
                     )
                 )
 
-        # print("incident edges:")
-        # print(self.G.incident_edge_index_map(the_origin_nid))
-
         # target can only be node with "_D" ends...
-        res_paths = rx.dijkstra_shortest_paths(
-            self.G,
-            source=the_origin_nid,
-            weight_fn=lambda x: x.total_t,
-            default_weight=0.01
-        )
+        self.visitor = DijkstraVisitor(cutoff=cutoff, target_v=None)
+        self.visitor.set_source_vs([the_origin_nid])
 
-        res_dists = rx.dijkstra_shortest_path_lengths(
+        rx.digraph_dijkstra_search(
             self.G,
-            node=the_origin_nid,
-            edge_cost_fn=lambda x: x.total_t
+            [the_origin_nid],  # source is a list of nodes
+            weight_fn=lambda x: x.total_t,  # check if there is a need for default_weight
+            visitor=self.visitor
         )
-        return res_paths, res_dists
+        res_paths = self.visitor.get_final_path()
+        total_time = self.visitor.final_cost
+
+        return res_paths, total_time
 
     def find_closest_next_time(self, stop_id: str, time_min: float) -> float:
         idx = self.nodes_time_map[stop_id].bisect_left(time_min)
@@ -302,17 +370,18 @@ class GTFSGraph:
         next_min = self.find_closest_next_time(stop_orig_id, depart_min)
         orig_node_id = self.query_node_or_create(stop_id=stop_orig_id, tod=int(depart_min))
         next_node_id = self.query_node_or_create(stop_id=stop_orig_id, tod=int(next_min))
-        journey_t = next_min - depart_min
+        
+        if orig_node_id != next_node_id:
+            journey_t = max(0.1, next_min - depart_min)
 
-        # create "self" link
-        self.add_edge(
-            node_a=orig_node_id, node_b=next_node_id,
-            properties=GTFSEdge(
-                start_node=orig_node_id, end_node=next_node_id,
-                trip_t=0, wait_t=journey_t, walk_t=0,
-                mode=EdgeMode.WAIT
+            self.add_edge(
+                node_a=orig_node_id, node_b=next_node_id,
+                properties=GTFSEdge(
+                    start_node=orig_node_id, end_node=next_node_id,
+                    trip_t=0, wait_t=journey_t, walk_t=0,
+                    mode=EdgeMode.WAIT
+                )
             )
-        )
 
         # create destination link
         node_id_dest = self.nodes_name_map[f"{stop_dest_id}_D"]
@@ -323,6 +392,7 @@ class GTFSGraph:
             stop_orig_id: str,
             stop_dest_id: str,
             depart_min: int,
+            cutoff: float,  # e.g., 180 for 3 hours
     ) -> dict:
         orig_node_id, node_id_dest = self._create_linkage_to_graph(
             stop_orig_id=stop_orig_id,
@@ -330,21 +400,28 @@ class GTFSGraph:
             depart_min=depart_min
         )
 
-        return rx.dijkstra_shortest_paths(
+        self.visitor = DijkstraVisitor(cutoff=cutoff, target_v=node_id_dest)
+        self.visitor.set_source_vs([orig_node_id])
+        # print("starting digraph search: ", orig_node_id, node_id_dest)
+        rx.digraph_dijkstra_search(
             self.G,
-            source=orig_node_id,
-            target=node_id_dest,
-            weight_fn=lambda x: x.total_t
+            [orig_node_id],  # source is a list of nodes
+            weight_fn=lambda x: x.total_t,  # check if there is a need for default_weight
+            visitor=self.visitor
         )
+        res_paths = self.visitor.get_final_path()
+        # print("res_paths:", res_paths)
+        return res_paths
 
     # get travel time/waiting time given path (a list of nodes)
     def get_travel_time_info_from_pth(
             self,
             G: rx.PyDiGraph,
-            path_nodes: rx.PathMapping,
+            path_nodes: list[int] | rx.PathMapping,
     ) -> tuple[float, float, float]:
-        first_node = list(path_nodes.keys())[0]
-        path_nodes = path_nodes[first_node]
+        if isinstance(path_nodes, rx.PathMapping):
+            first_node = list(path_nodes.keys())[0]
+            path_nodes = path_nodes[first_node]
         n0 = path_nodes[0]
 
         transit_time, wait_time, walk_time = 0, 0, 0
@@ -373,13 +450,15 @@ class GTFSGraph:
             stop_orig_ids: list[str],
             stop_dest_id: str,
             depart_min: int,
+            cutoff: float,
     ):
         paths = []
         for stop_orig_id in stop_orig_ids:
             paths.append(self.query_od_stops_time(
                 stop_orig_id=stop_orig_id,
                 stop_dest_id=stop_dest_id,
-                depart_min=depart_min
+                depart_min=depart_min,
+                cutoff=cutoff
             ))
         return paths
 
@@ -388,6 +467,7 @@ class GTFSGraph:
             stop_orig_id: str,
             stop_dest_ids: list[str],
             depart_min: int,
+            cutoff: float,
     ):
         paths = []
         print("paths in dest func: ", stop_dest_ids)
@@ -396,6 +476,7 @@ class GTFSGraph:
                 stop_orig_id=stop_orig_id,
                 stop_dest_id=stop_dest_id,
                 depart_min=depart_min,
+                cutoff=cutoff
             ))
         return paths
 
@@ -404,6 +485,7 @@ class GTFSGraph:
             stop_orig_ids: list[str],
             stop_dest_ids: list[str],
             depart_min: int,
+            cutoff: float,
             acc_orig_times: list[float] | None = None,
             acc_dest_times: list[float] | None = None
     ):
@@ -414,6 +496,7 @@ class GTFSGraph:
                     stop_orig_id=stop_orig_id,
                     stop_dest_id=stop_dest_id,
                     depart_min=depart_min,
+                    cutoff=cutoff
                 ))
         if acc_orig_times is None or acc_dest_times is None:
             return paths, None
