@@ -89,20 +89,29 @@ def page_3_execute(submit_button):
             st.error("should fill a date for analysis...")
 
         # filter the data set...
+        sel_sids = set()
         try:
             services = GTFS_OBJ.dfs["calendar.txt"].copy()
             services = filter_service_id_by_date(
                 services=services,
                 the_date=the_date
             )
+            # selected service ids
+            sel_sids.update(services["service_id"].tolist())
         except:
+            print("calendar.txt not found to extract service ids!")
+        
+        try:
             services = GTFS_OBJ.dfs["calendar_dates.txt"].copy()
-            services = filter_service_id_by_date_v2(
+            sids_included, sids_excluded = filter_service_id_by_date_v2(
                 services=services,
                 the_date=the_date
             )
-        # selected service ids
-        sel_sids = services["service_id"].tolist()
+            sel_sids.update(sids_included)
+            sel_sids.difference_update(set(sids_excluded))
+        except:
+            print("calendar_dates.txt not found to extract service ids!")
+        
         print(f"selected service ids {sel_sids}")
         network_config_info["service_id"] = sel_sids
         st.session_state["b3_1_clicked"] = True
