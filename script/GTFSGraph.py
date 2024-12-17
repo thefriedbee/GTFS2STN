@@ -73,6 +73,7 @@ class DijkstraCustomVisitor(DijkstraVisitor):
         self.source_vs: list[int] | None = None
         self.target_vs: list[int] | None = target_vs
         self.predecessors = {}
+        self.all_costs = {}  # need to record all costs for all visited nodes...
         self.final_cost = None
     
     def set_source_vs(self, source_vs: list[int]):
@@ -86,13 +87,14 @@ class DijkstraCustomVisitor(DijkstraVisitor):
             self.final_cost = score
             raise StopSearch
         if v not in self.predecessors:
+            self.all_costs[v] = score
             self.predecessors[v] = None
     
     def edge_relaxed(self, edge: float):
         u, v, w = edge
         self.predecessors[v] = u
 
-    def get_final_path(self):
+    def get_one_final_path_to_targets(self):
         if self.final_cost is None:
             print("no path found...")
             return []
@@ -120,6 +122,22 @@ class DijkstraCustomVisitor(DijkstraVisitor):
         
         path.reverse()
         return path
+    
+    def get_all_final_paths_from_sources(self) -> tuple[dict[int, list[int]], dict[int, int]]:
+        # for all searched nodes, return their paths from sources...
+        # this is less efficient but guarantees correctness...
+        all_paths = {}
+        for target_v in self.predecessors.keys():
+            path = []
+            current_v = target_v
+            while current_v is not None:
+                path.append(current_v)
+                current_v = self.predecessors[current_v]
+            path.reverse()
+            all_paths[target_v] = path
+        print("all_paths:", all_paths)
+        print("all_costs:", self.all_costs)
+        return all_paths, self.all_costs
 
 
 class GTFSGraph:
@@ -353,9 +371,9 @@ class GTFSGraph:
             node_id_dests=nodes_b_ids,
             cutoff=cutoff
         )
-        res_paths = visitor.get_final_path()
-        total_time = visitor.final_cost
-        return res_paths, total_time
+        # this function should return all paths for all visited nodes...
+        res_paths, res_costs = visitor.get_all_final_paths_from_sources()
+        return res_paths, res_costs
 
     def find_closest_next_time(self, stop_id: str, time_min: float) -> float:
         idx = self.nodes_time_map[stop_id].bisect_left(time_min)
@@ -416,8 +434,8 @@ class GTFSGraph:
             node_id_dests=node_id_dests,
             cutoff=cutoff
         )
-        res_paths = visitor.get_final_path()
-        return res_paths
+        res_path = visitor.get_one_final_path_to_targets()
+        return res_path
 
     # get travel time/waiting time given path (a list of nodes)
     def get_travel_time_info_from_pth(
