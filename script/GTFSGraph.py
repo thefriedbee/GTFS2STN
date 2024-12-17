@@ -93,6 +93,9 @@ class DijkstraCustomVisitor(DijkstraVisitor):
         self.predecessors[v] = u
 
     def get_final_path(self):
+        if self.final_cost is None:
+            print("no path found...")
+            return []
         # corner case: cannot reach within the cutoff time...
         if self.final_cost > self.cutoff:
             print(f"warning: no path found within the cutoff time {self.final_cost:.2f}>{self.cutoff:.2f} minutes...")
