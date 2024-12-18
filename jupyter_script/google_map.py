@@ -52,8 +52,7 @@ def coord_to_str(coord: tuple[float, float]) -> str:
 
 def query_all_times(coords: list[tuple[float, float]], t0: datetime, MAP_API: str) -> list[float]:
     times = []
-    ODs = list(itertools.combinations(coords, 2))
-    # print(f"ODs: {ODs}")
+    ODs = list(itertools.permutations(coords, 2))
     ODs = [OD for OD in ODs if OD[0] != OD[1]]
 
     for orig_coord, dest_coord in ODs:
