@@ -71,8 +71,8 @@ def display_stops_one_source(
         one_source_access_dict: dict,
 ) -> gpd.GeoDataFrame:
     print("stops shape:", stops.shape)
-    print("stops head:")
-    print(stops.head())
+    # print("stops head:")
+    # print(stops.head())
 
     stops_acc = pd.DataFrame.from_dict(one_source_access_dict, orient='index')
     stops_acc = stops_acc.reset_index()
@@ -83,6 +83,8 @@ def display_stops_one_source(
 
     stops = stops[["stop_id", "stop_lat", "stop_lon", "stop_name", "node_id"]]
     stops = stops.merge(stops_acc, on="node_id", how="inner")
+    # print("stops head:")
+    # print(stops.head())
     print("stops shape after merge:", stops.shape)
 
     stops = gpd.GeoDataFrame(
