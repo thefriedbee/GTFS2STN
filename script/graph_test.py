@@ -95,7 +95,7 @@ def test_add_hyper_nodes1():
     g.add_hyper_nodes()
     print(g.G.nodes())
     assert str(g.G.nodes()) == "[<R101,10,R101_10>, <R101,20,R101_20>, <R101,-1,R101_D>]"
-    assert str(g.G.edges()) == "[<0-2, (0,0,0), EdgeMode.ARRIVED>, <1-2, (0,0,0), EdgeMode.ARRIVED>]"
+    assert str(g.G.edges()) == "[<0-2, (0,0.1,0), EdgeMode.ARRIVED>, <1-2, (0,0.1,0), EdgeMode.ARRIVED>]"
     print(g.G.edge_index_map())
 
 
@@ -109,7 +109,7 @@ def test_add_hyper_nodes2():
     g.add_hyper_nodes()
     print(g.G.nodes())
     print(g.G.edges())
-    assert str(g.G.edges()) == "[<0-1, (0,10,0), EdgeMode.WAIT>, <0-2, (0,0,0), EdgeMode.ARRIVED>, <1-2, (0,0,0), EdgeMode.ARRIVED>]"
+    assert str(g.G.edges()) == "[<0-1, (0,10,0), EdgeMode.WAIT>, <0-2, (0,0.1,0), EdgeMode.ARRIVED>, <1-2, (0,0.1,0), EdgeMode.ARRIVED>]"
     assert str(g.G.nodes()) == "[<R101,10,R101_10>, <R101,20,R101_20>, <R101,-1,R101_D>]"
     print(g.G.edge_index_map())
 
@@ -177,35 +177,12 @@ def test_query_origin_stop_time():
     g.add_edges_within_same_stops()
     g.add_hyper_nodes()
 
-    # # query the shortest path...
-    # res_paths, res_dists = g.query_origin_stop_time(
-    #     stops_df=df,
-    #     stop_id="A",
-    #     depart_min=10,
-    #     walk_speed=1
-    # )
-    # print("all edges:", g.G.edges())
-    # print("num. of edges:", len(g.G.edges()))
-    # print("res paths:", res_paths)
-    # print("res dists:", res_dists)
-
-    # res_paths, res_dists = g.query_origin_stop_time(
-    #     stops_df=df,
-    #     stop_id="B",
-    #     depart_min=10,
-    #     walk_speed=1
-    # )
-    # print()
-    # print("res paths:", res_paths)
-    # print("res dists:", res_dists)
-    # print("res paths len:", len(res_paths))
-    # print("res dists len:", len(res_dists))
-
     res_paths, res_dists = g.query_origin_stop_time(
         stops_df=df,
         stop_id="A",
         depart_min=9,
-        walk_speed=1
+        walk_speed=1,
+        cutoff=1000
     )
     print()
     print("all nodes:", g.G.nodes())
@@ -213,7 +190,6 @@ def test_query_origin_stop_time():
     print("res paths:", res_paths)
     print("res dists:", res_dists)
     print("res paths len:", len(res_paths))
-    print("res dists len:", len(res_dists))
     assert 1 == 1
 
 
@@ -250,13 +226,14 @@ def test_query_od_stops_time():
     g.add_hyper_nodes()
 
     pth = g.query_od_stops_time(
-        stop_orig_id="A",
-        stop_dest_id="B",
-        depart_min=9
+        stop_orig_ids=["A"],
+        stop_dest_ids=["B"],
+        depart_min=9,
+        cutoff=1000
     )
     print("all nodes:", g.G.nodes())
     print("all edges:", g.G.edges())
     print(pth)
-    assert 1 == 2
+    assert pth == [10, 0, 4, 9]
 
 
