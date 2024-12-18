@@ -47,7 +47,7 @@ def page_4() -> tuple[gpd.GeoDataFrame, str, float, int]:
     col1, col2 = st.columns([1, 3])
     with col1:
         with st.form(key='stop_id_analysis'):
-            stop_id = st.text_input("choose stop id")
+            stop_id = st.text_input("choose stop id (hover/click on the map to get stop id)")
             depart_hr = st.slider(
                 "Departure time (hour of a day)",
                 0, 23, 8, 1
@@ -95,7 +95,8 @@ def page_4_execute(
             stops_df=stops,
             stop_id=stop_id,
             depart_min=60 * depart_hr,
-            # cutoff=max_tt,
+            cutoff=max_tt,
+            walk_speed=1.5  # TODO: add parameter to control walking speed?
         )
         print("one_source_paths len:", len(one_source_paths))
         print("one_source_dists len:", len(one_source_dists))
