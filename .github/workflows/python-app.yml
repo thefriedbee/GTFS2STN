@@ -22,4 +22,4 @@ jobs:
 
     - name: Run tests
       run: |
-        pytest  # Run your tests
+        pytest script/graph_test.py
