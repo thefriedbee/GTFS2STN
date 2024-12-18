@@ -14,6 +14,8 @@ To run the code locally, run by:
 streamlit run Introduction.py
 ```
 
+You can access jupyter notebook examples for batch analysis in this folder: https://github.com/thefriedbee/GTFS2STN/tree/main/jupyter_script
+
 
 Youtube video demo link: 
 
