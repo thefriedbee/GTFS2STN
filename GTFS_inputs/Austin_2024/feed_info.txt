@@ -1,0 +1,2 @@
+feed_publisher_name,feed_publisher_url,feed_lang,feed_start_date,feed_end_date,feed_version,feed_contact_url
+"Capital Metro",https://www.capmetro.org,en,20241105,20250111,241105_1034,http://www.capmetro.org

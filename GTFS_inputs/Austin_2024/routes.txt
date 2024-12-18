@@ -1,0 +1,71 @@
+route_id,agency_id,route_short_name,route_long_name,route_type,route_url,route_color,route_text_color
+1,CM,1,1-North Lamar/South Congress,3,http://www.capmetro.org/current_schedules/pdf/001.pdf,004A97,FFFFFF
+10,CM,10,10-South 1st/Red River,3,http://www.capmetro.org/current_schedules/pdf/010.pdf,004A97,FFFFFF
+103,CM,103,103-Manchaca Flyer,3,http://www.capmetro.org/current_schedules/pdf/103.pdf,555555,FFFFFF
+105,CM,105,105-South 5th Flyer,3,http://www.capmetro.org/current_schedules/pdf/105.pdf,555555,FFFFFF
+111,CM,111,111-South Mopac Flyer,3,http://www.capmetro.org/current_schedules/pdf/111.pdf,555555,FFFFFF
+135,CM,135,135-Dell Limited,3,http://www.capmetro.org/current_schedules/pdf/135.pdf,555555,FFFFFF
+142,CM,142,142-Metric Flyer,3,http://www.capmetro.org/current_schedules/pdf/142.pdf,555555,FFFFFF
+152,CM,152,152-Round Rock Tech Ridge Limited,3,http://www.capmetro.org/current_schedules/pdf/152.pdf,555555,FFFFFF
+171,CM,171,171-Oak Hill Flyer,3,http://www.capmetro.org/current_schedules/pdf/171.pdf,555555,FFFFFF
+18,CM,18,18-Martin Luther King,3,http://www.capmetro.org/current_schedules/pdf/018.pdf,004A97,FFFFFF
+2,CM,2,2-Rosewood/CESAR CHAVEZ,3,http://www.capmetro.org/current_schedules/pdf/002.pdf,004A97,FFFFFF
+20,CM,20,20-Manor Rd/Riverside,3,http://www.capmetro.org/current_schedules/pdf/020.pdf,004A97,FFFFFF
+201,CM,201,201-Southpark Meadows,3,http://www.capmetro.org/current_schedules/pdf/201.pdf,004A97,FFFFFF
+214,CM,214,214-Northwest Feeder,3,http://www.capmetro.org/current_schedules/pdf/214.pdf,004A97,FFFFFF
+217,CM,217,217-Montopolis Feeder,3,http://www.capmetro.org/current_schedules/pdf/217.pdf,004A97,FFFFFF
+228,CM,228,228-VA Clinic,3,http://www.capmetro.org/current_schedules/pdf/228.pdf,004A97,FFFFFF
+233,CM,233,233-Decker/Daffan Ln,3,http://www.capmetro.org/current_schedules/pdf/233.pdf,004A97,FFFFFF
+237,CM,237,237-Northeast Feeder,3,http://www.capmetro.org/current_schedules/pdf/237.pdf,004A97,FFFFFF
+243,CM,243,243-Wells Branch,3,http://www.capmetro.org/current_schedules/pdf/243.pdf,004A97,FFFFFF
+271,CM,271,271-Del Valle,3,http://www.capmetro.org/current_schedules/pdf/271.pdf,004A97,FFFFFF
+3,CM,3,3-Burnet/Manchaca,3,http://www.capmetro.org/current_schedules/pdf/003.pdf,004A97,FFFFFF
+30,CM,30,30-Barton Creek/Bull Creek,3,http://www.capmetro.org/current_schedules/pdf/030.pdf,004A97,FFFFFF
+300,CM,300,300-Springdale/Oltorf,3,http://www.capmetro.org/current_schedules/pdf/300.pdf,004A97,FFFFFF
+310,CM,310,310-Parker/Wickersham,3,http://www.capmetro.org/current_schedules/pdf/310.pdf,004A97,FFFFFF
+311,CM,311,311-Stassney,3,http://www.capmetro.org/current_schedules/pdf/311.pdf,004A97,FFFFFF
+315,CM,315,315-Ben White,3,http://www.capmetro.org/current_schedules/pdf/315.pdf,004A97,FFFFFF
+318,CM,318,318-Westgate/Slaughter,3,http://www.capmetro.org/current_schedules/pdf/318.pdf,004A97,FFFFFF
+322,CM,322,322-Chicon/Cherrywood,3,http://www.capmetro.org/current_schedules/pdf/322.pdf,004A97,FFFFFF
+323,CM,323,323-Anderson,3,http://www.capmetro.org/current_schedules/pdf/323.pdf,004A97,FFFFFF
+324,CM,324,324-Georgian/Ohlen,3,http://www.capmetro.org/current_schedules/pdf/324.pdf,004A97,FFFFFF
+325,CM,325,325-Metric/Rundberg,3,http://www.capmetro.org/current_schedules/pdf/325.pdf,004A97,FFFFFF
+333,CM,333,333-William Cannon,3,http://www.capmetro.org/current_schedules/pdf/333.pdf,004A97,FFFFFF
+335,CM,335,335 35th/38th,3,http://www.capmetro.org/current_schedules/pdf/335.pdf,004A97,FFFFFF
+337,CM,337,337-Koenig/Colony Park,3,http://www.capmetro.org/current_schedules/pdf/337.pdf,004A97,FFFFFF
+339,CM,339,339-Tuscany,3,http://www.capmetro.org/current_schedules/pdf/339.pdf,004A97,FFFFFF
+345,CM,345,345-45th,3,http://www.capmetro.org/current_schedules/pdf/345.pdf,004A97,FFFFFF
+350,CM,350,350-Airport Blvd,3,http://www.capmetro.org/current_schedules/pdf/350.pdf,004A97,FFFFFF
+383,CM,383,383-Research,3,http://www.capmetro.org/current_schedules/pdf/383.pdf,004A97,FFFFFF
+392,CM,392,392-Braker,3,http://www.capmetro.org/current_schedules/pdf/392.pdf,004A97,FFFFFF
+4,CM,4,4-7th Street,3,http://www.capmetro.org/current_schedules/pdf/004.pdf,004A97,FFFFFF
+465,CM,465,465-MLK/University of Texas,3,http://www.capmetro.org/current_schedules/pdf/465.pdf,004A97,FFFFFF
+466,CM,466,466-Kramer/Domain,3,http://www.capmetro.org/current_schedules/pdf/466.pdf,004A97,FFFFFF
+481,CM,481,481-Night Owl North Lamar,3,http://www.capmetro.org/current_schedules/pdf/481.pdf,004A97,FFFFFF
+483,CM,483,483-Night Owl Riverside,3,http://www.capmetro.org/current_schedules/pdf/483.pdf,004A97,FFFFFF
+484,CM,484,484-Night Owl South Lamar,3,http://www.capmetro.org/current_schedules/pdf/484.pdf,004A97,FFFFFF
+485,CM,485,485-Night Owl Cameron,3,http://www.capmetro.org/current_schedules/pdf/485.pdf,004A97,FFFFFF
+486,CM,486,486-Night Owl South Congress,3,http://www.capmetro.org/current_schedules/pdf/486.pdf,004A97,FFFFFF
+490,CM,490,490-HEB Shuttle,3,http://www.capmetro.org/current_schedules/pdf/490.pdf,004A97,FFFFFF
+491,CM,491,491-Allandale,3,http://www.capmetro.org/current_schedules/pdf/491.pdf,004A97,FFFFFF
+492,CM,492,492-Delwood,3,http://www.capmetro.org/current_schedules/pdf/492.pdf,004A97,FFFFFF
+493,CM,493,493-Eastview,3,http://www.capmetro.org/current_schedules/pdf/493.pdf,004A97,FFFFFF
+5,CM,5,5-Woodrow/Lamar,3,http://www.capmetro.org/current_schedules/pdf/005.pdf,004A97,FFFFFF
+50,CM,50,50-Round Rock Techridge,3,http://www.capmetro.org/current_schedules/pdf/050.pdf,004A97,FFFFFF
+550,CM,550,550-Metro Rail Red Line,0,http://www.capmetro.org/current_schedules/pdf/550.pdf,E2231A,FFFFFF
+640,CM,640,640-Forty Acres,3,http://www.capmetro.org/current_schedules/pdf/640.pdf,004A97,FFFFFF
+642,CM,642,642-West Campus/UT,3,http://www.capmetro.org/current_schedules/pdf/642.pdf,004A97,FFFFFF
+656,CM,656,656-Intramural Fields/UT,3,http://www.capmetro.org/current_schedules/pdf/656.pdf,004A97,FFFFFF
+661,CM,661,661-Far West/UT,3,http://www.capmetro.org/current_schedules/pdf/661.pdf,004A97,FFFFFF
+663,CM,663,663-Lake Austin/UT,3,http://www.capmetro.org/current_schedules/pdf/663.pdf,004A97,FFFFFF
+670,CM,670,670-Crossing Place,3,http://www.capmetro.org/current_schedules/pdf/670.pdf,004A97,FFFFFF
+671,CM,671,671-North Riverside,3,http://www.capmetro.org/current_schedules/pdf/671.pdf,004A97,FFFFFF
+672,CM,672,672-Lakeshore,3,http://www.capmetro.org/current_schedules/pdf/672.pdf,004A97,FFFFFF
+7,CM,7,7-Duval / Dove Springs,3,http://www.capmetro.org/current_schedules/pdf/007.pdf,004A97,FFFFFF
+801,CM,801,801-N Lamar S Congress,3,http://www.capmetro.org/current_schedules/pdf/801.pdf,555555,FFFFFF
+803,CM,803,803-Burnet/S Lamar,3,http://www.capmetro.org/current_schedules/pdf/803.pdf,555555,FFFFFF
+935,CM,935,935-Tech Ridge Express,3,http://www.capmetro.org/current_schedules/pdf/935.pdf,E2231A,FFFFFF
+980,CM,980,980-North Mopac Express,3,http://www.capmetro.org/current_schedules/pdf/980.pdf,E2231A,FFFFFF
+982,CM,982,982-Pavilion Express,3,http://www.capmetro.org/current_schedules/pdf/982.pdf,E2231A,FFFFFF
+985,CM,985,985-Leander/Lakeline Direct,3,http://www.capmetro.org/current_schedules/pdf/985.pdf,E2231A,FFFFFF
+990,CM,990,990-Manor/Elgin Express,3,http://www.capmetro.org/current_schedules/pdf/990.pdf,E2231A,FFFFFF
