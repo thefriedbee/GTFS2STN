@@ -39,10 +39,9 @@ def get_buffer_geom(
 
     curr_proj = stops_gdf.crs
     stops_gdf = stops_gdf.to_crs("epsg:4326")  # to wgs84
-    # print("stops_gdf head:")
-    # print(stops_gdf.head())
 
-    lat0, lon0 = stops_gdf['stop_lat'].mean(), stops_gdf['stop_lon'].mean()
+    lat0 = stops_gdf['stop_lat'].mean(skipna=True)
+    lon0 = stops_gdf['stop_lon'].mean(skipna=True)
     print("lat0, lon0:", lat0, lon0)
     __, __, zone, __ = utm.from_latlon(lat0, lon0)
     proj = pyproj.Proj(proj="utm", zone=zone, ellps="WGS84", datum="WGS84")
@@ -102,7 +101,7 @@ def find_nei_stops_given_coords(
         stops: gpd.GeoDataFrame,
         locs: list[tuple[float, float]],
         bw_mile: float = 0.5,
-        return_all_neighbors=False,
+        return_all_neighbors: bool = True,
 ) -> tuple[Any, Any]:
     # for each loc, get the nearest stops
     # set up indices
