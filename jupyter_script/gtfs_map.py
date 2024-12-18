@@ -51,55 +51,36 @@ def get_sel_ids(obj, the_date):
 
 
 def analyze_od_tt(obj, stops, orig_loc, dest_loc, depart_min, bw_mile, cutoff):
-    stop_orig_ids, stop_orig_acc_time = geo_analysis.find_nei_stops_given_coords(
+    stop_orig_ids, __ = geo_analysis.find_nei_stops_given_coords(
         stops = stops,
         locs = [orig_loc],
         bw_mile = bw_mile,
         return_all_neighbors=True
     )
-    stop_dest_ids, stop_dest_acc_time = geo_analysis.find_nei_stops_given_coords(
+    stop_dest_ids, __ = geo_analysis.find_nei_stops_given_coords(
         stops = stops,
         locs = [dest_loc],
         bw_mile = bw_mile,
         return_all_neighbors=True
     )
     
-    all_paths, acc_times = obj.query_od_stops_time(
+    pth, __ = obj.query_od_stops_time(
         stop_orig_ids=stop_orig_ids,
         stop_dest_ids=stop_dest_ids,
         depart_min=depart_min,  # e.g., departure at 10 AM
-        acc_orig_times=stop_orig_acc_time,
-        acc_dest_times=stop_dest_acc_time,
         cutoff=cutoff,
         return_costs=True
     )
     
-    # print("all_paths:", all_paths)
-    if len(all_paths) == 1 and all_paths[0] == []:
+    if len(pth) == 0:  # path not found
         return -1, -1, -1, -1
         # raise ValueError("no path found within the cutoff time (loaded wrong GTFS data, wrong calendar?)...")
-
-    travel_ts = []
-    wait_ts, walk_ts, total_ts = [], [], []        
-    for i, pth in enumerate(all_paths):
-        if pth == []:
-            continue
-        transit_t, wait_t, walk_t = obj.get_travel_time_info_from_pth(
-            obj.G, pth,
-        )
-        acc_time = acc_times[i]
-        travel_ts.append(transit_t)
-        wait_ts.append(wait_t)
-        walk_ts.append(walk_t + acc_time)
-        tt = transit_t + wait_t + walk_t + acc_time
-        total_ts.append(tt)
-
-    def argmin(lst):
-        return lst.index(min(lst))
-    path_index = argmin(total_ts)
     
-    return (travel_ts[path_index], wait_ts[path_index], 
-            walk_ts[path_index], total_ts[path_index])
+    transit_t, wait_t, walk_t = obj.get_travel_time_info_from_pth(
+        obj.G, pth,
+    )
+    tt = transit_t + wait_t + walk_t
+    return transit_t, wait_t, walk_t, tt
 
 
 def graph_query_all_times(
@@ -116,22 +97,22 @@ def graph_query_all_times(
     ttt_lst = []
     tts_moving = []  # either walking or traveling
     for orig_coord, dest_coord in ODs:
-        # try:
-        tt_travel, tt_wait, tt_walk, ttt = analyze_od_tt(
-            obj,
-            stops,
-            orig_loc = orig_coord,
-            dest_loc = dest_coord,
-            depart_min = depart_min,
-            bw_mile = bw_mile,
-            cutoff=cutoff
-        )
-        ttt_lst.append(ttt)
-        tts_moving.append(tt_travel+tt_walk)
-        # except:
-        #     print(f"path not found: {orig_coord}, {dest_coord}")
-        #     ttt_lst.append(-1)
-        #     tts_moving.append(-1)
+        try:
+            tt_travel, tt_wait, tt_walk, ttt = analyze_od_tt(
+                obj,
+                stops,
+                orig_loc = orig_coord,
+                dest_loc = dest_coord,
+                depart_min = depart_min,
+                bw_mile = bw_mile,
+                cutoff=cutoff
+            )
+            ttt_lst.append(ttt)
+            tts_moving.append(tt_travel+tt_walk)
+        except:
+            print(f"path not found: {orig_coord}, {dest_coord}")
+            ttt_lst.append(-1)
+            tts_moving.append(-1)
         print(".", end="")
     print()
     return ttt_lst, tts_moving
