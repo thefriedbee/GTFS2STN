@@ -57,7 +57,7 @@ def page_5_form(st_data):
     print('st.session_state["orig_coords"]', b5_form["orig_coords"])
     print('st.session_state["dest_coords"]', b5_form["dest_coords"])
 
-    is_origin_fixed = st.checkbox("freeze origin")
+    is_origin_fixed = st.checkbox("freeze/fix origin")
     placeholder_orig = st.empty()
     stop_orig_coords = placeholder_orig.text_input("enter origin coordinate (can click on map)")
     if is_origin_fixed and b5_form["orig_coords"] is not None:
@@ -74,19 +74,19 @@ def page_5_form(st_data):
         )
         b5_form["orig_coords"] = stop_orig_coords
 
-    is_dest_fixed = st.checkbox("freeze destination")
+    is_dest_fixed = st.checkbox("freeze/fix destination")
     placeholder_dest = st.empty()
     stop_dest_coords = placeholder_dest.text_input("enter destination coordinate (can click on map)")
     if is_dest_fixed and b5_form["dest_coords"] is not None:
         stop_dest_coords = placeholder_dest.text_input(
-            "enter destination coordinate (can click on map1)",
+            "enter destination coordinate (can click on map)",
             value=b5_form["dest_coords"],
         )
     elif is_dest_fixed:
         pass
     elif st_data is not None:
         stop_dest_coords = placeholder_dest.text_input(
-            "enter destination coordinate (can click on map2)",
+            "enter destination coordinate (can click on map)",
             value=get_last_active_drawing(st_data),
         )
         b5_form["dest_coords"] = stop_dest_coords
@@ -104,21 +104,6 @@ def page_5_form(st_data):
         0.1, 3.0, .5, 0.2,
     )
     b5_form["walk_dist"] = walk_dist
-
-    # select multiple origin or multiple destinations
-    run_mode = st.radio(
-        "Available mode for running the Dijkstra's algorithm:",
-        [
-            "1 source, 1 destination",
-            "1 source, 1+ destination",
-            "1+ source, 1 destination",
-            "1+ source, 1+ destination"
-        ]
-    )
-    b5_form["run_mode"] = run_mode
-
-    # submit_button = st.form_submit_button("Start Analysis & plot results")
-    # st.session_state["b5_1_clicked"] = submit_button
 
 
 def page_5() -> None:
@@ -146,7 +131,6 @@ def page_5_find_stops_given_coords():
     stop_orig_coords: str = st.session_state.b5_form_info["orig_coords"]
     stop_dest_coords: str = st.session_state.b5_form_info["dest_coords"]
     walk_dist: float = st.session_state.b5_form_info["walk_dist"]
-    run_code: int = st.session_state.b5_form_info["run_mode"]
 
     # parse str returns
     stop_orig_coords = stop_orig_coords.replace("\'", "\"")
@@ -160,43 +144,25 @@ def page_5_find_stops_given_coords():
     print("stop_dest_coords:", stop_dest_coords)
 
     # find all available stops within 0.25 mile buffer
-    return_all_origs = True
-    if run_code != 2:
-        return_all_origs = False
     stop_orig_ids, __ = geo_analysis.find_nei_stops_given_coords(
         stops,
         stop_orig_coords,
         bw_mile=walk_dist,
-        return_all_neighbors=return_all_origs
+        return_all_neighbors=True
     )
 
-    return_all_dests = True
-    if run_code != 1:
-        return_all_dests = False
     stop_dest_ids, __ = geo_analysis.find_nei_stops_given_coords(
         stops,
         stop_dest_coords,
         bw_mile=walk_dist,
-        return_all_neighbors=return_all_dests
+        return_all_neighbors=True
     )
     return stop_orig_ids, stop_dest_ids
 
 
 def page_5_od_reliability():
     # load parameters
-    run_mode: str = st.session_state.b5_form_info["run_mode"]
     depart_time_range: tuple[int, int] = st.session_state.b5_form_info["depart_time_range"]
-
-    # decode run mode
-    run_code = -1
-    if run_mode == "1 source, 1 destination":
-        run_code = 0
-    elif run_mode == "1 source, 1+ destination":
-        run_code = 1
-    elif run_mode == "1+ source, 1 destination":
-        run_code = 2
-    elif run_mode == "1+ source, 1+ destination":
-        run_code = 3
 
     st.title("Generate travel variability between od over time")
 
@@ -214,60 +180,28 @@ def page_5_od_reliability():
         hour_start, hour_end = depart_time_range
         min_start, min_end = hour_start * 60, hour_end * 60 + 1
         for depart_min in np.arange(min_start, min_end, step=10):  # step is every 10 minutes
-            print("run code:", run_code)
-            if run_code == 0:
-                pth = GRAPH_OBJ.query_od_stops_time(
-                    stop_orig_id=stop_orig_ids[0],
-                    stop_dest_id=stop_dest_ids[0],
-                    depart_min=depart_min,  # e.g., departure at 8 AM
-                )
-                all_paths = [pth]
-            elif run_code == 1:
-                all_paths = GRAPH_OBJ.query_od_stops_time_multiple_dest(
-                    stop_orig_id=stop_orig_ids[0],
-                    stop_dest_ids=stop_dest_ids,
-                    depart_min=depart_min,
-                )
-            elif run_code == 2:
-                all_paths = GRAPH_OBJ.query_od_stops_time_multiple_orig(
-                    stop_orig_ids=stop_orig_ids,
-                    stop_dest_id=stop_dest_ids[0],
-                    depart_min=depart_min,
-                )
-            elif run_code == 3:
-                all_paths, __ = GRAPH_OBJ.query_od_stops_time_multiple_ods(
-                    stop_orig_ids=stop_orig_ids,
-                    stop_dest_ids=stop_dest_ids,
-                    depart_min=depart_min,
-                )
-            else:
-                raise ValueError(f"run code {run_code} not recognized")
-
-            travel_ts = []
-            wait_ts, walk_ts, total_ts = [], [], []
-
-            print("all_paths:", all_paths)
-            for pth in all_paths:
-                print("pth", pth)
-                transit_t, wait_t, walk_t = GRAPH_OBJ.get_travel_time_info_from_pth(
-                    GRAPH_OBJ.G,
-                    pth,
-                )
-                tt = transit_t + wait_t + walk_t
-                travel_ts.append(transit_t)
-                wait_ts.append(wait_t)
-                walk_ts.append(walk_t)
-                total_ts.append(tt)
-
-            def argmin(lst):
-                return lst.index(min(lst))
-
-            path_index = argmin(total_ts)
-
-            transit_ts_min.append(travel_ts[path_index])
-            wait_ts_min.append(wait_ts[path_index])
-            walk_ts_min.append(walk_ts[path_index])
-            total_ts_min.append(total_ts[path_index])
+            pth = GRAPH_OBJ.query_od_stops_time(
+                stop_orig_ids=stop_orig_ids,
+                stop_dest_ids=stop_dest_ids,
+                depart_min=depart_min,
+                cutoff=1000,
+            )
+            
+            # decompose path time by transit, wait, walk, etc.
+            print("pth", pth)
+            transit_t, wait_t, walk_t = GRAPH_OBJ.get_travel_time_info_from_pth(
+                GRAPH_OBJ.G,
+                pth,
+            )
+            tt = transit_t + wait_t + walk_t
+            travel_ts = transit_t
+            wait_ts = wait_t
+            walk_ts = walk_t
+            total_ts = tt
+            transit_ts_min.append(travel_ts)
+            wait_ts_min.append(wait_ts)
+            walk_ts_min.append(walk_ts)
+            total_ts_min.append(total_ts)
 
         print("total_ts_min", total_ts_min)
         wait_ts_min = np.array(wait_ts_min)
