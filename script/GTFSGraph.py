@@ -68,12 +68,19 @@ class DijkstraCustomVisitor(DijkstraVisitor):
     # no need to search if time exceeds the cutoff...
     # The shortest path API (e.g., rx.dijkstra_shortest_paths) is not flexible enough
     # (e.g., no cutoff)
-    def __init__(self, cutoff: float, target_vs: list[int] | None):
+    def __init__(
+            self,
+            source_vs: list[int],  # must provide sources
+            target_vs: list[int] | None = None,
+            cutoff: float = float('inf'),
+    ):
         self.cutoff = cutoff
-        self.source_vs: list[int] | None = None
+        self.source_vs: list[int] | None = source_vs
         self.target_vs: list[int] | None = target_vs
+        if target_vs is None:
+            self.target_vs = {}
         self.predecessors = {}
-        self.all_costs = {}  # need to record all costs for all visited nodes...
+        self.all_costs = {vs: 0 for vs in self.source_vs}
         self.final_cost = None
     
     def set_source_vs(self, source_vs: list[int]):
@@ -87,12 +94,12 @@ class DijkstraCustomVisitor(DijkstraVisitor):
             self.final_cost = score
             raise StopSearch
         if v not in self.predecessors:
-            self.all_costs[v] = score
             self.predecessors[v] = None
     
     def edge_relaxed(self, edge: float):
         u, v, w = edge
         self.predecessors[v] = u
+        self.all_costs[v] = self.all_costs[u] + w.total_t
 
     def get_one_final_path_to_targets(self):
         if self.final_cost is None:
@@ -127,6 +134,7 @@ class DijkstraCustomVisitor(DijkstraVisitor):
         # for all searched nodes, return their paths from sources...
         # this is less efficient but guarantees correctness...
         all_paths = {}
+        all_costs = self.all_costs
         for target_v in self.predecessors.keys():
             path = []
             current_v = target_v
@@ -135,9 +143,9 @@ class DijkstraCustomVisitor(DijkstraVisitor):
                 current_v = self.predecessors[current_v]
             path.reverse()
             all_paths[target_v] = path
-        print("all_paths:", all_paths)
-        print("all_costs:", self.all_costs)
-        return all_paths, self.all_costs
+        print("num of all_paths:", len(all_paths))
+        print("num of all_costs:", len(all_costs))
+        return all_paths, all_costs
 
 
 class GTFSGraph:
@@ -252,11 +260,14 @@ class GTFSGraph:
     def _dijkstra_search_worker(
             self,
             orig_node_ids: list[int],
-            node_id_dests: list[int],
+            dest_node_ids: list[int] | None,
             cutoff: float
     ):
-        visitor = DijkstraCustomVisitor(cutoff=cutoff, target_vs=node_id_dests)
-        visitor.set_source_vs(orig_node_ids)
+        visitor = DijkstraCustomVisitor(
+            source_vs=orig_node_ids,
+            target_vs=dest_node_ids,
+            cutoff=cutoff,
+        )
         rx.digraph_dijkstra_search(
             self.G,
             orig_node_ids,  # source is a list of nodes
@@ -342,9 +353,6 @@ class GTFSGraph:
         journey_mins = next_mins - depart_mins
         for i, node_b_id in enumerate(nodes_b_ids):
             sid = nei_stop_ids[i]
-            # need to exclude itself (self-loops)
-            if stop_id == sid:
-                continue
 
             journey_t = max(0.1, round(journey_mins[i]))
             if stop_id != sid:
@@ -356,7 +364,7 @@ class GTFSGraph:
                         mode=EdgeMode.WALK
                     )
                 )
-            else:
+            else:  # both edges belong to the same bus stop
                 self.add_edge(
                     node_a=the_origin_nid, node_b=node_b_id,
                     properties=GTFSEdge(
@@ -368,7 +376,7 @@ class GTFSGraph:
 
         visitor = self._dijkstra_search_worker(
             orig_node_ids=[the_origin_nid],
-            node_id_dests=nodes_b_ids,
+            dest_node_ids=None,
             cutoff=cutoff
         )
         # this function should return all paths for all visited nodes...
@@ -415,6 +423,7 @@ class GTFSGraph:
             stop_dest_ids: list[str],
             depart_min: int,
             cutoff: float,  # e.g., 180 for 3 hours
+            return_costs: bool = False
     ) -> dict:
         # add final origin & destination links
         orig_node_ids = []
@@ -431,10 +440,12 @@ class GTFSGraph:
 
         visitor = self._dijkstra_search_worker(
             orig_node_ids=orig_node_ids,
-            node_id_dests=node_id_dests,
+            dest_node_ids=node_id_dests,
             cutoff=cutoff
         )
         res_path = visitor.get_one_final_path_to_targets()
+        if return_costs:
+            return res_path, visitor.final_cost
         return res_path
 
     # get travel time/waiting time given path (a list of nodes)
@@ -469,59 +480,3 @@ class GTFSGraph:
         walk_time = round(walk_time, 2)
         return transit_time, wait_time, walk_time
 
-    def query_od_stops_time_multiple_orig(
-            self,
-            stop_orig_ids: list[str],
-            stop_dest_id: str,
-            depart_min: int,
-            cutoff: float,
-    ):
-        paths = self.query_od_stops_time(
-            stop_orig_ids=stop_orig_ids,
-            stop_dest_ids=[stop_dest_id],
-            depart_min=depart_min,
-            cutoff=cutoff
-        )
-        return [paths]
-
-    def query_od_stops_time_multiple_dest(
-            self,
-            stop_orig_id: str,
-            stop_dest_ids: list[str],
-            depart_min: int,
-            cutoff: float,
-    ):
-        paths = self.query_od_stops_time(
-            stop_orig_ids=[stop_orig_id],
-            stop_dest_ids=stop_dest_ids,
-            depart_min=depart_min,
-            cutoff=cutoff
-        )
-        return [paths]
-
-    def query_od_stops_time_multiple_ods(
-            self,
-            stop_orig_ids: list[str],
-            stop_dest_ids: list[str],
-            depart_min: int,
-            cutoff: float,
-            acc_orig_times: list[float] | None = None,
-            acc_dest_times: list[float] | None = None
-    ):
-        paths = self.query_od_stops_time(
-            stop_orig_ids=stop_orig_ids,
-            stop_dest_ids=stop_dest_ids,
-            depart_min=depart_min,
-            cutoff=cutoff
-        )
-        paths = [paths]
-
-        if acc_orig_times is None or acc_dest_times is None:
-            return paths, None
-        
-        # get the acc_times
-        acc_times = []
-        for i, stop_orig_id in enumerate(stop_orig_ids):
-            for j, stop_dest_id in enumerate(stop_dest_ids):
-                acc_times.append(acc_orig_times[i] + acc_dest_times[j])
-        return paths, acc_times
