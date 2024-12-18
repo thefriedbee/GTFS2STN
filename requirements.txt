@@ -16,3 +16,4 @@ plotly
 streamlit-mermaid
 utm
 pyproj
+pytest
